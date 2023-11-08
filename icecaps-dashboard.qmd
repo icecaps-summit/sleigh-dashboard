@@ -1,0 +1,216 @@
+---
+title: "ICECAPS-MELT - RAVEN CAMP 2024"
+#author: 
+#    Von P. Walden
+#    Michael Gallagher
+format: dashboard
+output-dir: docs
+---
+
+```{python}
+#| output: false
+import numpy as np
+import pandas as pd
+
+import plotly.express as px
+```
+
+# MVP
+
+```{python}
+mvp = pd.DataFrame({'time': pd.date_range(start='2023-11-07', end='2023-11-08', freq='min'),
+                    'power': np.random.randn(24*60 + 1)*5 + 220,
+                    'voltage': np.random.randn(24*60 + 1) + 13,
+                    'current':np.random.randn(24*60 + 1) + 40})
+mvp.index = mvp.time
+
+current_P = mvp.power.iloc[-1]           # Watts
+current_V = mvp.voltage.iloc[-1]         # volts
+current_I = mvp.current.iloc[-1]         # amps
+```
+
+## Row {height=20%}
+
+```{python}
+#| component: valuebox
+#| title: "Power Draw (W)"
+
+if current_P < 400:
+    color_P = 'success'
+elif (current_P >= 400) and (current_P < 500):
+    color_P = 'warning'
+else:
+    color_P = 'danger'
+dict(
+    icon = 'battery',
+    color = color_P,
+    value = np.round(current_P)
+)
+```
+
+```{python}
+#| component: valuebox
+#| title: "Voltage (volts)"
+
+if (current_V >= 12) and (current_V < 14):
+    color_V = 'success'
+elif ((current_V >= 11) and (current_V < 12)) or ((current_V >= 14) and (current_V < 15)):
+    color_V = 'warning'
+else:
+    color_V = 'danger'
+dict(
+    icon = 'battery',
+    color = color_V,
+    value = np.round(current_V)
+)
+```
+
+```{python}
+#| component: valuebox
+#| title: "Current (amps)"
+
+if current_I < 30:
+    color_I = 'success'
+elif (current_P >= 30) and (current_P < 40):
+    color_I = 'warning'
+else:
+    color_I = 'danger'
+
+dict(
+    icon = 'battery',
+    color = color_I,
+    value = np.round(current_I)
+)
+```
+
+## Row {height=40%}
+```{python}
+fig = px.line(mvp, x='time', y="power")
+fig.update_traces(line_color='maroon')
+```
+
+## Row {height=40%}
+```{python}
+fig = px.line(mvp, x='time', y="voltage")
+fig.update_traces(line_color='lightcoral')
+```
+
+# INST
+
+## Row {height=100%}
+
+```{python}
+#|  title: 'Instrument Uptime'
+
+time = pd.date_range(start='2023-11-07', end='2023-11-08', freq='H').strftime('%Y%m%d %H')
+name = ['T2m', 'q2m', 'Simba', 'Sonic', 'KT15', 'CL61', 'MRR', 'MWR', 'GPR']
+data = np.random.randn(len(time), len(name))
+instruments = pd.DataFrame(data=data, columns=name, index=time)
+instruments[instruments>=0] = 1
+instruments[instruments<0] = 0
+
+fig = px.imshow(instruments.T, color_continuous_scale=['red', 'green'])
+fig.update_coloraxes(showscale=False)
+```
+
+# MET
+
+```{python}
+met = pd.DataFrame({'time': pd.date_range(start='2023-11-07', end='2023-11-08', freq='min'),
+                    'temperature':    np.random.random(24*60 + 1)*5 - 20, 
+                    'humidity':       np.random.random(24*60 + 1)*5 + 80, 
+                    'wind speed':     np.random.random(24*60 + 1)*5 + 5,
+                    'wind direction': np.random.random(24*60 + 1)*360 - 180,
+                    })
+met.index = met.time
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(met, x='time', y="temperature")
+fig.update_traces(line_color='purple')
+
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(met, x='time', y="humidity")
+fig.update_traces(line_color='blue')
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(met, x='time', y="wind speed")
+fig.update_traces(line_color='green')
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(met, x='time', y="wind direction")
+fig.update_traces(line_color='darkgray')
+```
+
+# SEB
+
+```{python}
+seb = pd.DataFrame({'time': pd.date_range(start='2023-11-07', end='2023-11-08', freq='min'),
+                    'net radiation': np.random.random(24*60 + 1)*5 + 20, 
+                    'sensible heat': np.random.random(24*60 + 1)*5 + 20, 
+                    'latent heat':   np.random.random(24*60 + 1)*5 + 5,
+                    'residual':      np.random.random(24*60 + 1)*5 + 5,
+                    })
+seb.index = seb.time
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(seb, x='time', y="net radiation")
+fig.show()
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(seb, x='time', y="sensible heat")
+fig.show()
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(seb, x='time', y="latent heat")
+fig.show()
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(seb, x='time', y="residual")
+fig.show()
+```
+
+# CLD
+
+```{python}
+cld = pd.DataFrame({'time': pd.date_range(start='2023-11-07', end='2023-11-08', freq='min'),
+                    'fraction': np.random.random(24*60 + 1), 
+                    'phase': np.random.random(24*60 + 1),
+                    'precip': np.random.random(24*60 + 1)*5 + 5
+                    })
+cld.index = cld.time
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(cld, x='time', y="fraction")
+fig.update_traces(line_color='purple')
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(cld, x='time', y="phase")
+fig.update_traces(line_color='green')
+```
+
+## Row {height=25%}
+```{python}
+fig = px.line(cld, x='time', y="precip")
+fig.update_traces(line_color='darkgray')
+```

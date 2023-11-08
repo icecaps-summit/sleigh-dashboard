@@ -4,7 +4,6 @@ title: "ICECAPS-MELT - RAVEN CAMP 2024"
 #    Von P. Walden
 #    Michael Gallagher
 format: dashboard
-output-dir: docs
 ---
 
 ```{python}

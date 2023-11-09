@@ -16,7 +16,7 @@ import plotly.express as px
 
 # INTRO
 
-This is a data dashboard for the ICECAPS-MELT SLEIGH deployment to Raven in summer 2024. 
+This is a data dashboard for the ICECAPS-MELT SLEIGH deployment to Raven in summer 2024. (SLEIGH = Surface Level Environmental Information for Greenland Hydrology)
 
 | Tab           | Description                          |
 |---------------|--------------------------------------|

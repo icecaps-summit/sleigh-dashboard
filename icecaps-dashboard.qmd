@@ -16,10 +16,10 @@ import plotly.express as px
 
 # INTRO
 
-This is a data dashboard for the ICECAPS-MELT SLEIGH. 
+This is a data dashboard for the ICECAPS-MELT SLEIGH deployment to Raven in summer 2024. 
 
-| Tab | Description                          |
-|-----|--------------------------------------|
+| Tab           | Description                          |
+|---------------|--------------------------------------|
 | [MVP](#mvp)   | Minimum Viable Powersystem |
 | [INST](#inst) | Instrument Uptime          |
 | [MET](#met)   | Near-surface meteorology   |

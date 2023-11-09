@@ -20,11 +20,11 @@ This is a data dashboard for the ICECAPS-MELT SLEIGH deployment to Raven in summ
 
 | Tab           | Description                          |
 |---------------|--------------------------------------|
-| [MVP](#mvp)   | Minimum Viable Powersystem |
-| [INST](#inst) | Instrument Uptime          |
-| [MET](#met)   | Near-surface meteorology   |
-| [SEB](#seb)   | Surface Energy Budget      |
-| [CLD](#cld)   | Clouds over SLEIGH         |
+| [MVP](#mvp)   | Minimum Viable Powersystem           |
+| [INST](#inst) | Instrument Uptime                    |
+| [MET](#met)   | Near-surface meteorology             |
+| [SEB](#seb)   | Surface Energy Budget                |
+| [CLD](#cld)   | Clouds over SLEIGH                   |
 
 Information on ICECAPS can be found [here](https://journals.ametsoc.org/view/journals/bams/94/2/bams-d-11-00249.1.xml).
 

@@ -26,7 +26,6 @@ git commit -m "Quarto render at 2023-11-09 09:07"
 git push
 ```
 
-This update will be viewable at https://vonw.github.io/icecaps-dashboard/icecaps-dashboard.html within a couple of minutes.
+This update will be viewable at https://icecaps-summit.github.io/sleigh-dashboard/data-dashboard.html within a couple of minutes.
 
 Created by Von P. Walden, Washington State University
-Date: 8 Nov 2023

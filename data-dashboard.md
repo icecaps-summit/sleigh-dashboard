@@ -6,7 +6,7 @@ author:
 date: 28 February 2024
 ---
 
-# My App
+# SLEIGH Dashboard for ICECAPS-MELT
 
 ```python
 import panel as pn
@@ -14,7 +14,7 @@ import panel as pn
 pn.extension(template='fast')
 ```
 
-## Documentation
+## DOCS
 
 This application provides a minimal example demonstrating how to write an app in a Markdown file.
 

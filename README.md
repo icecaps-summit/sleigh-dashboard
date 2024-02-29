@@ -17,9 +17,11 @@ conda activate sleigh-dashboard
 To serve the panel dashboard for SLEIGH, type
 
 ```
-panel serve data-dashboard.md --show --autoreload
+panel serve data-dashboard.md --show --autoreload --address "icecapsmelt.org"
 ```
 
 Note that this command will choose a random port on the computer in which it is executed. The local web address will be in the output from the command, so one must use that address to navigate to the served website.
+
+I'm going to need to setup the correct port on SANTA; see https://askubuntu.com/questions/916923/apache-config-how-to-enable-additional-ports 
 
 Created by Von P. Walden, Washington State University

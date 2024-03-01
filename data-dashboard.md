@@ -6,10 +6,11 @@ author:
 date: 28 February 2024
 ---
 
-# SLEIGH Dashboard for ICECAPS-MELT
+# SLEIGH Dashboard
 
 ```python
 import numpy as np
+import pandas as pd
 import xarray as xr
 import hvplot.xarray # noqa
 import holoviews as hv
@@ -17,7 +18,12 @@ import panel as pn
 pn.extension('echarts')
 pn.extension(template='fast')
 
-power = xr.open_dataset('/data/power/level2/power.mvp.level2.1min.20240229.000000.nc')
+# ....Determine today's and yesterday's dates
+today = pd.Timestamp.now('UTC')
+yesterday = pd.Timestamp.now('UTC')-pd.Timedelta('1d')
+
+power = xr.open_mfdataset(['/data/power/level2/power.mvp.level2.1min.' + yesterday.strftime('%Y%m%d') + '.000000.nc', '/data/power/level2/power.mvp.level2.1min.' + today.strftime('%Y%m%d') + '.000000.nc'])
+power = power.sel(time=slice(yesterday.to_datetime64(), today.to_datetime64()))
 
 p1 = pn.indicators.Number(name='Battery SOC', value=power.BatterySOC.resample(time='1h').mean().values[-1], format='{value:.0f}%', colors=[(25, 'red'), (50, 'gold'), (100, 'green')]
 )
@@ -35,22 +41,29 @@ row = pn.Row(p1, pn.Spacer(sizing_mode='stretch_width'), p2, pn.Spacer(sizing_mo
 row.servable()
 
 
-batterySOC = xr.DataArray(power.BatterySOC.values, coords=[("time", power.time.values)], name='BatterySOC')
+BatterySOC = xr.DataArray(power.BatterySOC.values, coords=[("time", power.time.values)], name='BatterySOC')
+BatteryWatts = xr.DataArray(power.BatteryWatts.values, coords=[("time", power.time.values)], name='BatteryWatts')
 
-p5 = batterySOC.hvplot(line_width=5, width=1300, height=400, title='Batteries', color='darkcyan')
-# Battery Watts = lightblue
+#overlay = hv.Curve([1, 2, 3], vdims=['A']) * hv.Curve([2, 3, 4], vdims=['A']) * hv.Curve([3, 2, 1], vdims=['B'])
+#overlay.opts(multi_y=True)
 
-solarWatts = xr.DataArray(power.SolarWatts_East.values + power.SolarWatts_South.values + power.SolarWatts_West.values, coords=[("time", power.time.values)], name='SolarWatts')
+p5 = BatterySOC.hvplot(grid=True, line_width=5, width=1600, height=500, title='Batteries', color='lightseagreen', vdims=['SOC [%]']).opts(active_tools=['box_zoom']) * BatteryWatts.hvplot(grid=True, line_width=5, width=1600, height=500, title='Batteries', color='lightblue', vdims=['Batts [W]'])
+p5.opts(multi_y=True)
 
-windWatts = xr.DataArray(power.WindWatts.values, coords=[("time", power.time.values)], name='windWatts')
+SolarWatts_Tot = xr.DataArray(power.SolarWatts_East.values + power.SolarWatts_South.values + power.SolarWatts_West.values, coords=[("time", power.time.values)], name='SolarWatts')
 
-p6 = solarWatts.hvplot(line_width=5, width=1300, height=400, title='Renewables', color='wheat') * windWatts.hvplot(line_width=5, width=1300, height=400, title='Renewables', color='purple')
+WindWatts = xr.DataArray(power.WindWatts.values, coords=[("time", power.time.values)], name='windWatts')
+
+p6 = SolarWatts_Tot.hvplot(grid=True, line_width=5, width=1600, height=500, title='Renewables', color='sienna', vdim=['Solar [W]']).opts(active_tools=['box_zoom']) * WindWatts.hvplot(line_width=5, width=1600, height=500, title='Renewables', color='darkkhaki', vdims=['Wind [W]'])
+p6.opts(multi_y=True)
 
 ACOutputWatts = xr.DataArray(power.ACOutputWatts.values, coords=[("time", power.time.values)], name='ACOutputWatts')
+DCInverterWatts = xr.DataArray(power.DCInverterWatts.values, coords=[("time", power.time.values)], name='DCInverterWatts')
+DCWatts = SolarWatts_Tot + WindWatts - BatteryWatts - DCInverterWatts
+DCWatts.name = 'DCWatts'
 
-DCWatts = xr.DataArray(power.DCWatts.values, coords=[("time", power.time.values)], name='DCWatts')
-
-p7 = ACOutputWatts.hvplot(line_width=5, width=1300, height=400, title='Output', color='darkred') * DCWatts.hvplot(line_width=5, width=1300, height=400, title='Output', color='slategrey')
+p7 = ACOutputWatts.hvplot(grid=True, line_width=5, width=1600, height=500, title='Output', color='firebrick', vdims=['AC [W]']).opts(active_tools=['box_zoom']) * DCWatts.hvplot(line_width=5, width=1600, height=500, color='blue', vdims=['DC [W]'])
+p7.opts(multi_y=True)
 
 col = pn.Column(p5, p6, p7)
 col.servable()

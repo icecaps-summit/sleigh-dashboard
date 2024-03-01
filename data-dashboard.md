@@ -38,33 +38,40 @@ p4 = pn.indicators.Number(name='Battery Voltage', value=power.BatteryVoltage.res
 )
 
 row = pn.Row(p1, pn.Spacer(sizing_mode='stretch_width'), p2, pn.Spacer(sizing_mode='stretch_width'), p3, pn.Spacer(sizing_mode='stretch_width'), p4)
-row.servable()
+#row.servable()
 
 
-BatterySOC = xr.DataArray(power.BatterySOC.values, coords=[("time", power.time.values)], name='BatterySOC')
-BatteryWatts = xr.DataArray(power.BatteryWatts.values, coords=[("time", power.time.values)], name='BatteryWatts')
+BatterySOC = xr.DataArray(power.BatterySOC.values, coords=[("time", power.time.values)], name='SOC [%]')
+BatteryWatts = xr.DataArray(power.BatteryWatts.values, coords=[("time", power.time.values)], name='BattS [W]')
 
 #overlay = hv.Curve([1, 2, 3], vdims=['A']) * hv.Curve([2, 3, 4], vdims=['A']) * hv.Curve([3, 2, 1], vdims=['B'])
 #overlay.opts(multi_y=True)
 
-p5 = BatterySOC.hvplot(grid=True, line_width=5, width=1600, height=500, title='Batteries', color='lightseagreen', vdims=['SOC [%]']).opts(active_tools=['box_zoom']) * BatteryWatts.hvplot(grid=True, line_width=5, width=1600, height=500, title='Batteries', color='lightblue', vdims=['Batts [W]'])
+p5 = BatterySOC.hvplot(grid=True, line_width=5, width=1400, height=400, title='BATTERIES', color='lightseagreen', vdims=['SOC [%]']).opts(active_tools=['box_zoom']) * BatteryWatts.hvplot(grid=True, line_width=5, width=1400, height=400, color='lightblue', vdims=['Batts [W]'])
 p5.opts(multi_y=True)
 
-SolarWatts_Tot = xr.DataArray(power.SolarWatts_East.values + power.SolarWatts_South.values + power.SolarWatts_West.values, coords=[("time", power.time.values)], name='SolarWatts')
+SolarWatts_Tot = xr.DataArray(power.SolarWatts_East.values + power.SolarWatts_South.values + power.SolarWatts_West.values, coords=[("time", power.time.values)], name='Solar [W]')
 
-WindWatts = xr.DataArray(power.WindWatts.values, coords=[("time", power.time.values)], name='windWatts')
+WindWatts = xr.DataArray(power.WindWatts.values, coords=[("time", power.time.values)], name='Wind [W]')
 
-p6 = SolarWatts_Tot.hvplot(grid=True, line_width=5, width=1600, height=500, title='Renewables', color='sienna', vdim=['Solar [W]']).opts(active_tools=['box_zoom']) * WindWatts.hvplot(line_width=5, width=1600, height=500, title='Renewables', color='darkkhaki', vdims=['Wind [W]'])
+p6 = SolarWatts_Tot.hvplot(grid=True, line_width=5, width=1400, height=400, title='RENEWABLES', color='sienna', vdim=['Solar [W]']).opts(active_tools=['box_zoom']) * WindWatts.hvplot(line_width=5, width=1400, height=400, color='darkkhaki', vdims=['Wind [W]'])
 p6.opts(multi_y=True)
 
-ACOutputWatts = xr.DataArray(power.ACOutputWatts.values, coords=[("time", power.time.values)], name='ACOutputWatts')
+ACOutputWatts = xr.DataArray(power.ACOutputWatts.values, coords=[("time", power.time.values)], name='AC [W]')
 DCInverterWatts = xr.DataArray(power.DCInverterWatts.values, coords=[("time", power.time.values)], name='DCInverterWatts')
 DCWatts = SolarWatts_Tot + WindWatts - BatteryWatts - DCInverterWatts
-DCWatts.name = 'DCWatts'
+DCWatts.name = 'DC [W]'
 
-p7 = ACOutputWatts.hvplot(grid=True, line_width=5, width=1600, height=500, title='Output', color='firebrick', vdims=['AC [W]']).opts(active_tools=['box_zoom']) * DCWatts.hvplot(line_width=5, width=1600, height=500, color='blue', vdims=['DC [W]'])
+p7 = ACOutputWatts.hvplot(grid=True, line_width=5, width=1400, height=400, title='OUTPUT', color='firebrick', vdims=['AC [W]']).opts(active_tools=['box_zoom']) * DCWatts.hvplot(line_width=5, width=1400, height=400, color='blue', vdims=['DC [W]'])
 p7.opts(multi_y=True)
 
 col = pn.Column(p5, p6, p7)
-col.servable()
+#col.servable()
+
+tabs = pn.Tabs(('Minimum Viable Powersupply', pn.Column(row, col)))
+tabs.append(('Instrument Uptime', p5))
+tabs.append(('Near-surface Meteorology', p5))
+tabs.append(('Surface Energy Budget', p5))
+tabs.append(('Cloud Properties', p5))
+tabs.servable()
 ```

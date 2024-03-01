@@ -27,7 +27,7 @@ power = power.sel(time=slice(yesterday.to_datetime64(), today.to_datetime64()))
 # ....Row of battery and power numbers and gauges
 p1 = pn.indicators.Number(name='Battery SOC', value=power.BatterySOC.resample(time='1h').mean().values[-1], format='{value:.0f}%', colors=[(25, 'red'), (50, 'gold'), (100, 'green')])
 
-p2 = pn.indicators.Gauge(name="DC Power", value=np.round(power.DCWatts.resample(time='1h').mean().values[-1]), bounds=(0, 250), format='{value} W', colors=[(0.4, 'green'), (0.6, 'gold'), (1, 'red')],custom_opts={"pointer": {"itemStyle": {"color": 'black'}}})
+p2 = pn.indicators.Gauge(name="DC Inv Power", value=np.round(power.DCInverterWatts.resample(time='1h').mean().values[-1]), bounds=(0, 250), format='{value} W', colors=[(0.4, 'green'), (0.6, 'gold'), (1, 'red')],custom_opts={"pointer": {"itemStyle": {"color": 'black'}}})
 #p2 = pn.indicators.Number(name='DC Power', value=power.DCWatts.resample(time='1h').mean().values[-1], format='{value:.0f}W', colors=[(100, 'green'), (200, 'yellow'), (300, 'red')])
 
 p3 = pn.indicators.Gauge(name="AC Power", value=np.round(power.ACOutputWatts.resample(time='1h').mean().values[-1]), bounds=(0, 1500), format='{value} W',colors=[(0.167, 'green'), (0.3, 'gold'), (1, 'red')],custom_opts={"pointer": {"itemStyle": {"color": 'black'}}})
@@ -57,7 +57,8 @@ p6.opts(multi_y=True)
 
 ACOutputWatts = xr.DataArray(power.ACOutputWatts.values, coords=[("time", power.time.values)], name='AC [W]')
 DCInverterWatts = xr.DataArray(power.DCInverterWatts.values, coords=[("time", power.time.values)], name='DCInverterWatts')
-DCWatts = SolarWatts_Tot + WindWatts - BatteryWatts - DCInverterWatts
+#DCWatts = SolarWatts_Tot + WindWatts - BatteryWatts - DCInverterWatts
+DCWatts = SolarWatts_Tot - BatteryWatts - DCInverterWatts
 DCWatts.name = 'DC [W]'
 
 p7 = ACOutputWatts.hvplot(grid=True, line_width=5, height=400, title='OUTPUT', color='firebrick', vdims=['AC [W]'], responsive=True).opts(active_tools=['box_zoom']) * DCWatts.hvplot(line_width=5, height=400, color='blue', vdims=['DC [W]'], responsive=True)

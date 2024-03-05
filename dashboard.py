@@ -8,11 +8,11 @@ import panel as pn
 
 import time, datetime
 
-#pn.extension(design='material', template='material')
+from tabs import tab_cl61
+
+pn.extension(design='material', template='material')
 
 from multiprocessing import Process
-
-from tabs import tab_cl61
 
 def process_data():
 
@@ -232,53 +232,44 @@ def process_data():
     #################### CLOUD PROPERTIES #####################
     tabs.append(('Cloud Properties', pn.pane.Markdown('# Coming soon...')))
 
-    tabs.append( ('CL61', tab_cl61()) )
+    tabs.append(('CL61', tab_cl61.tab_cl61()))
 
     # %%
-    tabs.servable(title='ICECAPS SLEIGH-MVP Dashboard')
     #tabs.servable(title='ICECAPS SLEIGH-MVP Dashboard')
-    tabs.show()
+    #tabs.servable(title='ICECAPS SLEIGH-MVP Dashboard')
+    #tabs.show()
 
     return tabs
 
 def launch_server_process(panel_dict):
 
-    server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
-                             port=8087, websocket_origin="*", show=False)
+    server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard')
+                            # port=5006, websocket_origin="*", show=False)
 
     return True # not necessary but explicit
 
 
 
 def main():
+    try:
+        tabs = process_data()
+        panel_dict = {'dashboard': tabs} # if you make other pages, add them here... 
 
-    while True:           
+        p = Process(target=launch_server_process, args=(panel_dict,))
+        p.start()
+        print('process started')
+        
+    except KeyboardInterrupt:   
+        print("Exiting...")
+        exit()
 
-        try:
-            tabs = process_data()
-            panel_dict = {'dashboard': tabs} # if you make other pages, add them here... 
-
-            p = Process(target=launch_server_process, args=(panel_dict,))
-            p.start()
-            for s in range(0,60):
-                print("... we could do work here...")
-                time.sleep(1)
-
-            print("Restarting websocket...")
-
-            p.join(timeout=1); p.terminate()
-            
-        except KeyboardInterrupt:   
-            print("Exiting...")
-            exit()
-
-        except Exception as e:
-            print(e)
+    except Exception as e:
+        print(e)
 
 
 # this runs the function main as the main program... functions
 # to come after the main code so it presents in a more logical, C-like, way
 # https://stackoverflow.com/questions/11241523/why-does-python-code-run-faster-in-a-function
-if __name__ == '__main__':
+#if __name__ == '__main__':
 
-    main()
+main()

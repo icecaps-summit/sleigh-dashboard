@@ -6,7 +6,7 @@ import hvplot.xarray # noqa
 import holoviews as hv
 import panel as pn
 
-import time
+import time, datetime
 
 #pn.extension(design='material', template='material')
 
@@ -34,6 +34,11 @@ def process_data():
 
     # ....Select the past 24 hours only... 
     power = power.sel(time=slice(yesterday.to_datetime64(), today.to_datetime64()))
+
+    tz = datetime.timezone(datetime.timedelta(seconds=0))
+    last_obs_time = pd.to_datetime(power.time.data[-1]).replace(tzinfo=tz)
+    secs_ago =str(int(np.abs((last_obs_time- pd.Timestamp.now('UTC')).total_seconds()/60)))
+
 
     BatterySOC = xr.DataArray(power.BatterySOC.values,
                               coords=[("time", power.time.values)], name='SOC [%]')
@@ -124,7 +129,7 @@ def process_data():
 
     p5 = BatterySOC.hvplot(grid=True, 
                            height=400, 
-                           title='BATTERIES (most recent measurement from ' + pd.to_datetime(power.time.data[-1]).strftime('%H:%M') +')', 
+                           title='BATTERIES (last data from ' + secs_ago +' mins ago)', 
                            label='SOC [%]',
                            color='mediumvioletred', responsive=True).opts(active_tools=['box_zoom']) * \
         BatteryWatts.hvplot(height=400, 
@@ -139,7 +144,7 @@ def process_data():
                                       y = ['Total', 'East', 'West', 'South'],
                                       color =  ['gold', 'khaki', 'olive', 'darkgoldenrod' ],
                                   height=400, 
-                                  title='RENEWABLES (most recent measurement from ' + pd.to_datetime(power.time.data[-1]).strftime('%H:%M') +')',
+                                  title='RENEWABLES (last data from ' + secs_ago +' mins ago)',
                                label='Solar [W]',
                                responsive=True)
 
@@ -158,7 +163,7 @@ def process_data():
 
     splot = SolarWatts_Tot.hvplot(grid=True, 
                                   height=400, 
-                                  title='RENEWABLES (most recent measurement from ' + pd.to_datetime(power.time.data[-1]).strftime('%H:%M') +')',
+                                  title='RENEWABLES (last data from ' + secs_ago +' mins ago)',
                                label='Solar [W]',
                                color='gold', responsive=True)* \
           SolarWatts_W.hvplot(grid=True, 
@@ -175,7 +180,7 @@ def process_data():
                                color='tan', responsive=True)
 
 
-    # p6 = hv.Overlay([SolarWatts_E.hvplot(title='RENEWABLES (most recent measurement from '+pd.to_datetime(power.time.data[-1]).strftime('%H:%M')+')',
+    # p6 = hv.Overlay([SolarWatts_E.hvplot(title='RENEWABLES (most recent measurement from '+secs_ago+' mins ago)',
     #                                      color='tan', label='Solar [W]',
     #                                      height=400, grid=True, responsive=True), 
     #                  SolarWatts_S.hvplot(color='darkkhaki', height=400, responsive=True),
@@ -193,7 +198,7 @@ def process_data():
 
     p7 = ACOutputWatts.hvplot(grid=True, 
                               height=400, 
-                              title='OUTPUT (most recent measurement from '+pd.to_datetime(power.time.data[-1]).strftime('%H:%M')+')', 
+                              title='OUTPUT (last data from '+secs_ago+' mins ago)', 
                               color='firebrick', 
                               label='AC [W]',
                               responsive=True).opts(active_tools=['box_zoom']) * \

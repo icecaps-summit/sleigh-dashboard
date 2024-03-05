@@ -256,17 +256,20 @@ def main():
 
             p = Process(target=launch_server_process, args=(panel_dict,))
             p.start()
-            for s in range(0,59):
+            for s in range(0,10):
                 print("... we could do work here...")
                 time.sleep(1)
 
-            p.join(); p.stop(); p.terminate()
-
             print("Restarting websocket...")
+
+            p.join(timeout=1); p.terminate()
             
         except KeyboardInterrupt:   
             print("Exiting...")
             exit()
+
+        except Exception as e:
+            print(e)
 
 
 # this runs the function main as the main program... functions

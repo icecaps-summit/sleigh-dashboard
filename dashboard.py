@@ -12,6 +12,8 @@ import time, datetime
 
 from multiprocessing import Process
 
+from . import tab_cl61
+
 def process_data():
 
     pn.extension('echarts', template='fast', nthreads=4, notifications=False)
@@ -229,6 +231,8 @@ def process_data():
     # %%
     #################### CLOUD PROPERTIES #####################
     tabs.append(('Cloud Properties', pn.pane.Markdown('# Coming soon...')))
+
+    tabs.append( ('CL61', tab_cl61.tab_cl61()) )
 
     # %%
     #tabs.servable(title='ICECAPS SLEIGH-MVP Dashboard')

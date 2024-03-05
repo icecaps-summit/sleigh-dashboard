@@ -1,0 +1,16 @@
+name: sleigh-dashboard
+channels:
+  - conda-forge
+dependencies:
+  - ipykernel
+  - jupyter
+  - jupyter_bokeh
+  - numpy
+  - pandas
+  - xarray
+  - netcdf4
+  - dask
+  - bokeh
+  - holoviews
+  - hvplot
+  - panel

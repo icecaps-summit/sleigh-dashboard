@@ -7,25 +7,21 @@ This repo contains files to create a dashboard for the ICECAPS-MELT SLEIGH platf
 To create a virtual Python environment on your local computer, type (assuming pip is installed):
 
 ```
-python3 -m venv .venv
-python3 -m pip install -r requirements.txt
+conda env create -f environmental.yml
+conda deactivate      # Deactivate base conda environment
+conda activate sleigh-dashboard
 ```
 
-## Quarto
+## Panel
 
-Install quarto on your local computer using [these instructions](https://quarto.org/docs/get-started/).
-
-## git
-
-To update the website that is associated with this github repo, type the following from the directory that contains the repo:
+To serve the panel dashboard for SLEIGH, type
 
 ```
-quarto render
-git add *
-git commit -m "Quarto render at 2023-11-09 09:07"
-git push
+panel serve data-dashboard.md --show --autoreload --address "icecapsmelt.org"
 ```
 
-This update will be viewable at https://icecaps-summit.github.io/sleigh-dashboard/data-dashboard.html within a couple of minutes.
+Note that this command will choose a random port on the computer in which it is executed. The local web address will be in the output from the command, so one must use that address to navigate to the served website.
+
+I'm going to need to setup the correct port on SANTA; see https://askubuntu.com/questions/916923/apache-config-how-to-enable-additional-ports 
 
 Created by Von P. Walden, Washington State University

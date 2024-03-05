@@ -12,7 +12,7 @@ import time, datetime
 
 from multiprocessing import Process
 
-from . import tab_cl61
+from tabs import tab_cl61
 
 def process_data():
 
@@ -232,19 +232,19 @@ def process_data():
     #################### CLOUD PROPERTIES #####################
     tabs.append(('Cloud Properties', pn.pane.Markdown('# Coming soon...')))
 
-    tabs.append( ('CL61', tab_cl61.tab_cl61()) )
+    tabs.append( ('CL61', tab_cl61()) )
 
     # %%
+    tabs.servable(title='ICECAPS SLEIGH-MVP Dashboard')
     #tabs.servable(title='ICECAPS SLEIGH-MVP Dashboard')
-    #tabs.servable(title='ICECAPS SLEIGH-MVP Dashboard')
-    #tabs.show()
+    tabs.show()
 
     return tabs
 
 def launch_server_process(panel_dict):
 
     server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
-                             port=6646, websocket_origin="*", show=False)
+                             port=8087, websocket_origin="*", show=False)
 
     return True # not necessary but explicit
 

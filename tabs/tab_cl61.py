@@ -9,6 +9,9 @@ import panel as pn
 import datetime as dt
 import os
 
+def testfn():
+    print('relative import worked!')
+
 def load_cl61():
     dir_cl61 = '/data/cl61/daily'
     files_cl61 = [os.path.join( dir_cl61,f ) for f in os.listdir(dir_cl61) if 'summary_cl61' in f]

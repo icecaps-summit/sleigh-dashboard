@@ -10,6 +10,8 @@ import time
 
 #pn.extension(design='material', template='material')
 
+from multiprocessing import Process
+
 def process_data():
 
     pn.extension('echarts', template='fast', nthreads=4, notifications=False)
@@ -22,11 +24,11 @@ def process_data():
 
     #####################################################################
     # ....Read data from SLEIGH and MVP
-    power_yesterday = xr.open_dataset('/data/power/level2/power.mvp.level2.1min.'
-                                      + yesterday.strftime('%Y%m%d') + '.000000.nc')
+    power_yesterday = xr.open_mfdataset('/data/power/level2/power.mvp.level2.1min.'
+                                      + yesterday.strftime('%Y%m%d') + '.*.nc')
 
-    power_today = xr.open_dataset('/data/power/level2/power.mvp.level2.1min.'
-                                  + today.strftime('%Y%m%d') + '.000000.nc')
+    power_today = xr.open_mfdataset('/data/power/level2/power.mvp.level2.1min.'
+                                  + today.strftime('%Y%m%d') + '.*.nc')
 
     power = xr.concat([power_yesterday, power_today], dim='time')
 
@@ -230,19 +232,30 @@ def process_data():
 
     return tabs
 
+def launch_server_process(panel_dict):
+
+    server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
+                             port=6646, websocket_origin="*", show=False)
+
+    return True # not necessary but explicit
+
+
+
 def main():
 
     while True:           
 
         try:
             tabs = process_data()
-            server_thread = pn.serve({'dashboard': tabs }, title='ICECAPS SLEIGH-MVP Dashboard',
-                                     port=6646, websocket_origin="*", show=False, threaded=True)
+            panel_dict = {'dashboard': tabs} # if you make other pages, add them here... 
 
+            p = Process(target=launch_server_process, args=(panel_dict,))
+            p.start()
             for s in range(0,59):
                 print("... we could do work here...")
                 time.sleep(1)
-            server_thread.stop()
+
+            p.join(); p.stop(); p.terminate()
 
             print("Restarting websocket...")
             

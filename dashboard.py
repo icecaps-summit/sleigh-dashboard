@@ -256,7 +256,7 @@ def main():
 
             p = Process(target=launch_server_process, args=(panel_dict,))
             p.start()
-            for s in range(0,10):
+            for s in range(0,60):
                 print("... we could do work here...")
                 time.sleep(1)
 

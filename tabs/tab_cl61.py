@@ -2,6 +2,7 @@ import numpy as np
 import xarray as xr
 import hvplot.xarray # noqa
 import hvplot
+import holoviews as hv
 import panel as pn
 
 import datetime as dt
@@ -37,14 +38,21 @@ def tab_cl61():
     '''
     dttd = dt.datetime.today()
     start_of_today = dt.datetime(dttd.year, dttd.month, dttd.day)
-    dtrange = [ start_of_today - dt.timedelta(days=2), start_of_today ]
+    dtrange = ( start_of_today - dt.timedelta(days=2), start_of_today )
     ######################## CLOUD HEIGHT INFORMATION ###########################
     #############################################################################
 
     p1 = ds.time_count.hvplot.scatter(x='time', ylim=[-1,16], label='time_count',
-        height=400, grid=True, responsive=True, xlim=dtrange,
+        height=400, grid=True, responsive=True,
         title='INSTRUMENT UPTIME', ylabel='records per 15 minutes'
     )
+    p1_tgt = p1.relabel('INSTRUMENT UPTIME').opts(height=400, toolbar='disable')
+    p1_src = p1.opts(height=50, yaxis=None, default_tools=[], shared_axes=False, ylim=(-1,16))
+    hv.plotting.links.RangeToolLink(
+        p1_src, p1_tgt, axes=['x', 'y'], boundsx=dtrange, boundsy=(None, None)
+    )
+    #l=(p1_tgt + p1_src).cols(1)
+    #l.opts(hv.opts.Layout(shared_axes=False, merge_tools=False))
 
     ds['zero'] = 1e-10*ds.cloud_thickness_mean
     p2 = ds.hvplot.scatter(x='time', y='cloud_base_heights_mean', by='layer',
@@ -57,8 +65,8 @@ def tab_cl61():
     )
     #p1 = pn.bind(pf1, dtrange=dt_range_picker)
 
-    p3 = ds.cloud_thickness_mean.hvplot.scatter(x='time')
+    #p3 = ds.cloud_thickness_mean.hvplot.scatter(x='time', by='layer')
 
     # include all elements to be displayed in the returned pn.Column object
-    display = pn.Column(title,p1, p3, p2)#dt_range_picker, p1)
+    display = pn.Column(title,p1_tgt, p1_src, p2)#, p3)#dt_range_picker, p1)
     return display 

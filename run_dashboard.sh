@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x
+#set -x
 
 # run the dashboard panel/bokeh/websocket python script for displaying sleigh+mvp info
 while true

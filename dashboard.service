@@ -2,9 +2,9 @@
 Description=sync dataman sled data for processing
 
 [Service]
-Type=oneshot
+Type=forking
 StandardOutput=console
-ExecStart=/usr/bin/bash -ic "/home/sleigh/sleigh-dashboard/run_dashboard.sh" # -i , must be interactive... conda hmghbchhchch
+ExecStart=/usr/bin/bash -ic "/home/sleigh/sleigh-dashboard/run_dashboard.sh &" # -i , must be interactive... conda hmghbchhchch
 
 StandardOutput=journal
  

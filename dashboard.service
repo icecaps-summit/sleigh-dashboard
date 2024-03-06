@@ -1,0 +1,12 @@
+[Unit]
+Description=sync dataman sled data for processing
+
+[Service]
+Type=oneshot
+StandardOutput=console
+ExecStart=/usr/bin/bash -ic "/home/sleigh/sleigh-dashboard/run_dashboard.sh" # -i , must be interactive... conda hmghbchhchch
+
+StandardOutput=journal
+ 
+[Install]
+WantedBy=default.target

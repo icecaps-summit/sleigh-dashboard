@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S python3 -u
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -11,6 +11,10 @@ import time, datetime
 #pn.extension(design='material', template='material')
 
 from multiprocessing import Process
+
+import warnings
+warnings.filterwarnings("ignore")
+
 
 def process_data():
 
@@ -29,8 +33,6 @@ def process_data():
     tz = datetime.timezone(datetime.timedelta(seconds=0))
     last_obs_time = pd.to_datetime(power.time.data[-1]).replace(tzinfo=tz)
     secs_ago =str(int(np.abs((last_obs_time- pd.Timestamp.now('UTC')).total_seconds()/60)))
-
-
 
     BatterySOC = xr.DataArray(power.BatterySOC.values,
                               coords=[("time", power.time.values)], name='SOC [%]')
@@ -74,19 +76,19 @@ def process_data():
     # %%
     #################### MINIMUM VIABLE POWERSUPPLY #####################
     #####################################################################
-    averagingTime = '10m'    # Currently 10 minutes
-
-    recent_power = power.sel(time=slice((today-pd.Timedelta(averagingTime)).to_datetime64(), today.to_datetime64()))
+    averagingTime = '10T'    # Currently 10 minutes
+    
+    last_time = today
 
     # ....Row of battery and power numbers and gauges
     p1 = pn.indicators.Number(name='Battery SOC', 
-                              value=recent_power.BatterySOC.resample(time=averagingTime).mean().values[-1], 
+                              value=power.BatterySOC.resample(time=averagingTime).mean().values[-1], 
                               format='{value:.0f}%',
                               colors=[(25, 'red'), (50, 'gold'), (100, 'green')]
     )
 
     p2 = pn.indicators.Gauge(name='DC Power', 
-                             value=np.round(recent_power.DCWatts.resample(time=averagingTime).mean().values[-1]), 
+                             value=np.round(power.DCWatts.resample(time=averagingTime).mean().values[-1]), 
                              bounds=(0, 250), 
                              format='{value} W', 
                              colors=[(0.4, 'green'), (0.6, 'gold'), (1, 'red')],
@@ -96,7 +98,7 @@ def process_data():
     #)
 
     p3 = pn.indicators.Gauge(name="AC Power", 
-                             value=np.round(recent_power.ACOutputWatts.resample(time=averagingTime).mean().values[-1]), 
+                             value=np.round(power.ACOutputWatts.resample(time=averagingTime).mean().values[-1]), 
                              bounds=(0, 1500), 
                              format='{value} W',
                              colors=[(0.167, 'green'), (0.3, 'gold'), (1, 'red')],
@@ -106,7 +108,7 @@ def process_data():
     #)
 
     p4 = pn.indicators.Number(name='Battery Voltage', 
-                              value=recent_power.BatteryVoltage.resample(time=averagingTime).mean().values[-1], 
+                              value=power.BatteryVoltage.resample(time=averagingTime).mean().values[-1], 
                               format='{value:.1f} V', 
                               colors=[(40, 'red'), (45, 'yellow'), (55, 'green'), (60, 'yellow'), (70, 'red')]
     )
@@ -241,6 +243,7 @@ def get_power_data(start_date, end_date, data_dir='/data/power/level2/'):
     for curr_date in pd.date_range(start_date, end_date+datetime.timedelta(1)):
         data_list+=glob.glob(f'{data_dir}/power.mvp.level2.1min.'+curr_date.strftime('%Y%m%d')+ '.*.nc')
 
+
     power = xr.open_mfdataset(data_list)
 
     #power = xr.concat([power_yesterday, power_today], dim='time')
@@ -251,15 +254,12 @@ def get_power_data(start_date, end_date, data_dir='/data/power/level2/'):
     return power.load()
 
 
-
 def launch_server_process(panel_dict):
 
     server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
                              port=6646, websocket_origin="*", show=False)
 
     return True # not necessary but explicit
-
-
 
 def main():
 
@@ -271,8 +271,8 @@ def main():
 
             p = Process(target=launch_server_process, args=(panel_dict,))
             p.start()
-            for s in range(0,60):
-                if s % 30 ==0 : print("... we could do work here... but we're still alive")
+            for s in range(0,6000):
+                if s % 600 ==0 : print("... we could do work here... but we're still alive")
                 time.sleep(1)
 
             print("Restarting websocket...")

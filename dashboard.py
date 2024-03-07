@@ -75,15 +75,18 @@ def process_data():
     #################### MINIMUM VIABLE POWERSUPPLY #####################
     #####################################################################
     averagingTime = '10m'    # Currently 10 minutes
+
+    recent_power = power.sel(time=slice((today-pd.Timedelta(averagingTime)).to_datetime64(), today.to_datetime64()))
+
     # ....Row of battery and power numbers and gauges
     p1 = pn.indicators.Number(name='Battery SOC', 
-                              value=power.BatterySOC.resample(time=averagingTime).mean().values[-1], 
+                              value=recent_power.BatterySOC.resample(time=averagingTime).mean().values[-1], 
                               format='{value:.0f}%',
                               colors=[(25, 'red'), (50, 'gold'), (100, 'green')]
     )
 
     p2 = pn.indicators.Gauge(name='DC Power', 
-                             value=np.round(power.DCWatts.resample(time=averagingTime).mean().values[-1]), 
+                             value=np.round(recent_power.DCWatts.resample(time=averagingTime).mean().values[-1]), 
                              bounds=(0, 250), 
                              format='{value} W', 
                              colors=[(0.4, 'green'), (0.6, 'gold'), (1, 'red')],
@@ -93,7 +96,7 @@ def process_data():
     #)
 
     p3 = pn.indicators.Gauge(name="AC Power", 
-                             value=np.round(power.ACOutputWatts.resample(time=averagingTime).mean().values[-1]), 
+                             value=np.round(recent_power.ACOutputWatts.resample(time=averagingTime).mean().values[-1]), 
                              bounds=(0, 1500), 
                              format='{value} W',
                              colors=[(0.167, 'green'), (0.3, 'gold'), (1, 'red')],
@@ -103,7 +106,7 @@ def process_data():
     #)
 
     p4 = pn.indicators.Number(name='Battery Voltage', 
-                              value=power.BatteryVoltage.resample(time=averagingTime).mean().values[-1], 
+                              value=recent_power.BatteryVoltage.resample(time=averagingTime).mean().values[-1], 
                               format='{value:.1f} V', 
                               colors=[(40, 'red'), (45, 'yellow'), (55, 'green'), (60, 'yellow'), (70, 'red')]
     )
@@ -244,8 +247,6 @@ def get_power_data(start_date, end_date, data_dir='/data/power/level2/'):
 
     # ... select the requested range only... 
     power = power.sel(time=slice(start_date.to_datetime64(), end_date.to_datetime64()))
-
-    print(power.time)
 
     return power.load()
 

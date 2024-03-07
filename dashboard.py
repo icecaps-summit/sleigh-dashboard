@@ -24,20 +24,12 @@ def process_data():
 
     #####################################################################
     # ....Read data from SLEIGH and MVP
-    power_yesterday = xr.open_mfdataset('/data/power/level2/power.mvp.level2.1min.'
-                                      + yesterday.strftime('%Y%m%d') + '.*.nc')
-
-    power_today = xr.open_mfdataset('/data/power/level2/power.mvp.level2.1min.'
-                                  + today.strftime('%Y%m%d') + '.*.nc')
-
-    power = xr.concat([power_yesterday, power_today], dim='time')
-
-    # ....Select the past 24 hours only... 
-    power = power.sel(time=slice(yesterday.to_datetime64(), today.to_datetime64()))
+    power = get_power_data(start_date=yesterday, end_date=today, data_dir='/data/power/level2/')
 
     tz = datetime.timezone(datetime.timedelta(seconds=0))
     last_obs_time = pd.to_datetime(power.time.data[-1]).replace(tzinfo=tz)
     secs_ago =str(int(np.abs((last_obs_time- pd.Timestamp.now('UTC')).total_seconds()/60)))
+
 
 
     BatterySOC = xr.DataArray(power.BatterySOC.values,
@@ -238,6 +230,27 @@ def process_data():
 
     return tabs
 
+def get_power_data(start_date, end_date, data_dir='/data/power/level2/'):
+
+    import glob
+
+    data_list = []
+    for curr_date in pd.date_range(start_date, end_date+datetime.timedelta(1)):
+        data_list+=glob.glob(f'{data_dir}/power.mvp.level2.1min.'+curr_date.strftime('%Y%m%d')+ '.*.nc')
+
+    power = xr.open_mfdataset(data_list)
+
+    #power = xr.concat([power_yesterday, power_today], dim='time')
+
+    # ... select the requested range only... 
+    power = power.sel(time=slice(start_date.to_datetime64(), end_date.to_datetime64()))
+
+    print(power.time)
+
+    return power.load()
+
+
+
 def launch_server_process(panel_dict):
 
     server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
@@ -257,8 +270,8 @@ def main():
 
             p = Process(target=launch_server_process, args=(panel_dict,))
             p.start()
-            for s in range(0,6000):
-                print("... we could do work here...")
+            for s in range(0,60):
+                if s % 30 ==0 : print("... we could do work here... but we're still alive")
                 time.sleep(1)
 
             print("Restarting websocket...")

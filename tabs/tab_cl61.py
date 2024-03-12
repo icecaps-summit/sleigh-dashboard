@@ -1,6 +1,7 @@
 import numpy as np
 import xarray as xr
 import hvplot.xarray # noqa
+import hvplot.pandas
 import hvplot
 import holoviews as hv
 import panel as pn
@@ -64,6 +65,34 @@ def tab_cl61():
 
     #p3 = ds.cloud_thickness_mean.hvplot.scatter(x='time', by='layer')
 
+
+    #################### DATA STREAM NULLRATE ###############################
+
+    def unstack_xarray_dataset_by_dim(ds: xr.Dataset, dim):
+        '''Function to unstack dataset variables along a finite, discrete dimension
+        
+        e.g. ds.<var>(..., dim) -> <var>_dim0, <var>_dim1, ..., <var>_dimN
+        '''
+        new_ds = ds[[]]
+        for v in ds.variables:
+            if dim in ds[v].dims:
+                for di in ds[dim].values:
+                    new_ds[f'{v}_{dim}{di}'] = ds[v].sel({dim:di}).squeeze()
+            else:
+                new_ds[v] = ds[v]
+        return new_ds
+
+
+
+    VARS_nullrate = (v for v in ds.variables if '_nullrate' in v)
+    ds_nullrate = unstack_xarray_dataset_by_dim(ds[[*VARS_nullrate]], 'layer')
+    df_heatmap = ds_nullrate.to_dataframe(dim_order=('time',))#.astype({'time':np.datetime64})
+    df_heatmap = df_heatmap[[v for v in df_heatmap.keys() if '_nullrate' in v]]
+    #p_nullrate = df_heatmap.hvplot.heatmap(x='index',height=400, responsive=True)
+    #p_nullrate = df_heatmap.hvplot.scatter(x='time', height=400).opts(ylim=(-0.1,1.1), xlim=dtrange)
+    p_nullrate = df_heatmap.hvplot.heatmap(height=500, ylim=dtrange, rot=70, xaxis='top')
+
+
     # include all elements to be displayed in the returned pn.Column object
-    display = pn.Column(title,p1_tgt, p1_src, p2)#, p3)#dt_range_picker, p1)
+    display = pn.Column(title,p1_tgt, p1_src, p_nullrate, p2)#, p3)#dt_range_picker, p1)
     return display 

@@ -3,7 +3,8 @@ Description=Run dashboard websocket via panel
 
 [Service]
 Type=forking
-ExecStart=/usr/bin/bash -c "stdbuf -oL -eL /home/sleigh/sleigh-dashboard/run_dashboard.sh |& tee /home/sleigh/sleigh-dashboard/logs/dashboard.$(date '+%%Y%%m%%d.%%H%%M.%%S').log &"
+WorkingDirectory=%h/sleigh-dashboard/
+ExecStart=/usr/bin/bash -c "cd /home/sleigh/sleigh-dashboard/; pwd; stdbuf -oL -eL ./run_dashboard.sh |& tee ./logs/dashboard.$(date '+%%Y%%m%%d.%%H%%M.%%S').log &"
 ExecStop=/usr/bin/bash -c "kill -9 $(ps ux | grep dash -i | grep -v system | grep -v journal | awk '{print $2}')"
 
 # Restart every >2 seconds to avoid StartLimitInterval failure

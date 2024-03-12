@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S python3 -u
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -14,6 +14,10 @@ pn.extension(design='material', template='material')
 
 from multiprocessing import Process
 
+import warnings
+warnings.filterwarnings("ignore")
+
+
 def process_data():
 
     pn.extension('echarts', template='fast', nthreads=4, notifications=False)
@@ -26,21 +30,11 @@ def process_data():
 
     #####################################################################
     # ....Read data from SLEIGH and MVP
-    power_yesterday = xr.open_mfdataset('/data/power/level2/power.mvp.level2.1min.'
-                                      + yesterday.strftime('%Y%m%d') + '.*.nc')
-
-    power_today = xr.open_mfdataset('/data/power/level2/power.mvp.level2.1min.'
-                                  + today.strftime('%Y%m%d') + '.*.nc')
-
-    power = xr.concat([power_yesterday, power_today], dim='time')
-
-    # ....Select the past 24 hours only... 
-    power = power.sel(time=slice(yesterday.to_datetime64(), today.to_datetime64()))
+    power = get_power_data(start_date=yesterday, end_date=today, data_dir='/data/power/level2/')
 
     tz = datetime.timezone(datetime.timedelta(seconds=0))
     last_obs_time = pd.to_datetime(power.time.data[-1]).replace(tzinfo=tz)
     secs_ago =str(int(np.abs((last_obs_time- pd.Timestamp.now('UTC')).total_seconds()/60)))
-
 
     BatterySOC = xr.DataArray(power.BatterySOC.values,
                               coords=[("time", power.time.values)], name='SOC [%]')
@@ -84,15 +78,19 @@ def process_data():
     # %%
     #################### MINIMUM VIABLE POWERSUPPLY #####################
     #####################################################################
+    averagingTime = '10T'    # Currently 10 minutes
+    
+    last_time = today
+
     # ....Row of battery and power numbers and gauges
     p1 = pn.indicators.Number(name='Battery SOC', 
-                              value=power.BatterySOC.resample(time='1h').mean().values[-1], 
+                              value=power.BatterySOC.resample(time=averagingTime).mean().values[-1], 
                               format='{value:.0f}%',
                               colors=[(25, 'red'), (50, 'gold'), (100, 'green')]
     )
 
     p2 = pn.indicators.Gauge(name='DC Power', 
-                             value=np.round(power.DCWatts.resample(time='1h').mean().values[-1]), 
+                             value=np.round(power.DCWatts.resample(time=averagingTime).mean().values[-1]), 
                              bounds=(0, 250), 
                              format='{value} W', 
                              colors=[(0.4, 'green'), (0.6, 'gold'), (1, 'red')],
@@ -102,7 +100,7 @@ def process_data():
     #)
 
     p3 = pn.indicators.Gauge(name="AC Power", 
-                             value=np.round(power.ACOutputWatts.resample(time='1h').mean().values[-1]), 
+                             value=np.round(power.ACOutputWatts.resample(time=averagingTime).mean().values[-1]), 
                              bounds=(0, 1500), 
                              format='{value} W',
                              colors=[(0.167, 'green'), (0.3, 'gold'), (1, 'red')],
@@ -112,8 +110,8 @@ def process_data():
     #)
 
     p4 = pn.indicators.Number(name='Battery Voltage', 
-                              value=power.BatteryVoltage.resample(time='1h').mean().values[-1], 
-                              format='{value:.0f} V', 
+                              value=power.BatteryVoltage.resample(time=averagingTime).mean().values[-1], 
+                              format='{value:.1f} V', 
                               colors=[(40, 'red'), (45, 'yellow'), (55, 'green'), (60, 'yellow'), (70, 'red')]
     )
 
@@ -241,14 +239,31 @@ def process_data():
 
     return tabs
 
+def get_power_data(start_date, end_date, data_dir='/data/power/level2/'):
+
+    import glob
+
+    data_list = []
+    for curr_date in pd.date_range(start_date, end_date+datetime.timedelta(1)):
+        data_list+=glob.glob(f'{data_dir}/power.mvp.level2.1min.'+curr_date.strftime('%Y%m%d')+ '.*.nc')
+
+
+    power = xr.open_mfdataset(data_list)
+
+    #power = xr.concat([power_yesterday, power_today], dim='time')
+
+    # ... select the requested range only... 
+    power = power.sel(time=slice(start_date.to_datetime64(), end_date.to_datetime64()))
+
+    return power.load()
+
+
 def launch_server_process(panel_dict):
 
     server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard')
                             # port=5006, websocket_origin="*", show=False)
 
     return True # not necessary but explicit
-
-
 
 def main():
     try:
@@ -265,6 +280,7 @@ def main():
 
     except Exception as e:
         print(e)
+
 
 
 # this runs the function main as the main program... functions

@@ -8,9 +8,6 @@ import panel as pn
 import datetime as dt
 import os
 
-def testfn():
-    print('relative import worked!')
-
 def load_cl61():
     dir_cl61 = '/data/cl61/daily'
     files_cl61 = [os.path.join( dir_cl61,f ) for f in os.listdir(dir_cl61) if 'summary_cl61' in f]
@@ -46,7 +43,7 @@ def tab_cl61():
         height=400, grid=True, responsive=True,
         title='INSTRUMENT UPTIME', ylabel='records per 15 minutes'
     )
-    p1_tgt = p1.relabel('INSTRUMENT UPTIME').opts(height=400, toolbar='disable')
+    p1_tgt = p1.relabel('INSTRUMENT UPTIME').opts(height=400)
     p1_src = p1.opts(height=50, yaxis=None, default_tools=[], shared_axes=False, ylim=(-1,16))
     hv.plotting.links.RangeToolLink(
         p1_src, p1_tgt, axes=['x', 'y'], boundsx=dtrange, boundsy=(None, None)

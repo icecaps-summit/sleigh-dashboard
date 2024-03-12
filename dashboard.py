@@ -109,16 +109,16 @@ def process_data():
     #                         custom_opts={"pointer": {"itemStyle": {"color": 'black'}}}
     #)
 
-    p4 = pn.indicators.Number(name='Battery Voltage', 
-                              value=power.BatteryVoltage.resample(time=averagingTime).mean().values[-1], 
-                              format='{value:.1f} V', 
-                              colors=[(40, 'red'), (45, 'yellow'), (55, 'green'), (60, 'yellow'), (70, 'red')]
-    )
+    #p4 = pn.indicators.Number(name='Battery Voltage', 
+    #                          value=power.BatteryVoltage.resample(time=averagingTime).mean().values[-1], 
+    #                          format='{value:.1f} V', 
+    #                          colors=[(40, 'red'), (45, 'yellow'), (55, 'green'), (60, 'yellow'), (70, 'red')]
+    #)
 
     row = pn.Row(p1, pn.Spacer(sizing_mode='stretch_width'), 
                  p2, pn.Spacer(sizing_mode='stretch_width'), 
                  p3, pn.Spacer(sizing_mode='stretch_width'), 
-                 p4
+#                 p4
     )
 
     # %%

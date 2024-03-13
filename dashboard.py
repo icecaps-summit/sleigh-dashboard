@@ -21,7 +21,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 sys.path.insert(0,'/home/sleigh/sleigh-dashboard/tabs')
-from tab_cl61 import tab_cl61
 
 alarm_color   = 'palevioletred'
 warning_color = 'khaki'

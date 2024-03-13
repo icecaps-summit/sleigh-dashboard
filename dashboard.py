@@ -8,6 +8,11 @@ import panel as pn
 
 import time, datetime, traceback, sys
 
+from tabs import tab_cl61
+from tabs import tab_asfs
+
+pn.extension(design='material', template='material')
+
 #pn.extension(design='material', template='material')
  
 from multiprocessing import Process
@@ -246,6 +251,9 @@ def create_tabs():
     # %%
     #################### CLOUD PROPERTIES #####################
     tabs.append(('Cloud Properties', pn.pane.Markdown('# Coming soon...')))
+
+    tabs.append(('CL61', tab_cl61.tab_cl61()))
+    tabs.append(('ASFS', tab_asfs.tab_asfs()))
 
     # %%
     tabs.append(('CL61', tab_cl61()))

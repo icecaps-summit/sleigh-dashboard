@@ -163,5 +163,7 @@ def tab_asfs():
     #    )
 
     # include all elements to be displayed in the returned pn.Column object
-    display = pn.Column(title,pn.Column(p_scantime, p_boxtemp, p_sw_cal, p_lw_cal, p_rad, p_plate_flux, p_gas_density, p_licor_sig, p_snow_acoustic, p_metek_wind, p_metek_incl, p_sw_tach, p_sw_heatcurr, p_lw_heatv))#, *var_plots)
+    display = pn.Column(title,pn.Column(p_scantime, p_boxtemp, p_sw_cal, p_lw_cal, p_rad, p_plate_flux, p_gas_density, p_licor_sig, p_snow_acoustic, p_metek_wind, p_metek_incl, p_sw_tach, p_sw_heatcurr, p_lw_heatv), scroll=True)#, *var_plots)
+    left_spacer = pn.Column(width=20)
+    display = pn.Row(left_spacer, display, left_spacer)
     return display 

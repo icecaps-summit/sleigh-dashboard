@@ -10,6 +10,7 @@ import time, datetime, traceback, sys
 
 from tabs import tab_cl61
 from tabs import tab_asfs
+from tabs import tab_mrr
 
 pn.extension(design='material', template='material')
 
@@ -219,7 +220,19 @@ def power_columns(refresh_button_state=None):
 
     return pn.Column(pn.Column(row), col)
 
+
+
 def create_tabs():
+    # create the datetimerange picker and update button that appear on all tabs
+    now = datetime.datetime.now()
+    t_day_start = datetime.time(0,0,0)
+    t_yyday = datetime.date.today() - datetime.timedelta(days=2)
+    start_yyday = datetime.datetime.combine(t_yyday, t_day_start)
+    epoch=datetime.date(2024,3,1)
+    datetimerange_select = pn.widgets.DatetimeRangePicker(
+        name='Default time range:',
+        value = (start_yyday, now), enable_seconds=False, start=epoch
+    )
 
     update_button = pn.widgets.Button(name='ICECAPS MELT — MVP Dashboard, click to refresh data',
                                       button_type='primary', button_style='outline', 
@@ -239,11 +252,17 @@ def create_tabs():
 
     tabs.append(('CL61', tab_cl61.tab_cl61()))
     tabs.append(('ASFS', tab_asfs.tab_asfs()))
-    tabs.append(('MRR', pn.pane.Markdown('# Coming soon...')))
+    tabs.append(('MRR', tab_mrr.tab_mrr()))
+    
     tabs.append(('MWR', pn.pane.Markdown('# Coming soon...')))
     tabs.append(('BLE', pn.pane.Markdown('# Coming soon...')))
 
-    return tabs
+    display = pn.Column(
+        pn.Row(datetimerange_select, update_button),
+        tabs
+    )
+
+    return display
 
 def get_power_data(start_date, end_date, data_dir='/data/power/level2/'):
 
@@ -269,7 +288,8 @@ def get_power_data(start_date, end_date, data_dir='/data/power/level2/'):
 def launch_server_process(panel_dict):
 
     server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
-                             port=6646, websocket_origin="*", show=False)
+                             #port=6646, websocket_origin="*", show=False)
+                             port=5006, websocket_origin='*', show=False) 
 
     return True # not necessary but explicit
 

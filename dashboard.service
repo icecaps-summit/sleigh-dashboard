@@ -4,7 +4,7 @@ Description=Run dashboard websocket via panel
 [Service]
 Type=forking
 WorkingDirectory=%h/sleigh-dashboard/
-ExecStart=/usr/bin/bash -c "cd /home/sleigh/sleigh-dashboard/; pwd; stdbuf -oL -eL ./run_dashboard.sh |& tee ./logs/dashboard.$(date '+%%Y%%m%%d.%%H%%M.%%S').log &"
+ExecStart=/bin/bash -c "cd /home/website_admin/sleigh-dashboard/; pwd; stdbuf -oL -eL ./run_dashboard.sh |& tee ./logs/dashboard.$(date '+%%Y%%m%%d.%%H%%M.%%S').log &"
 ExecStop=/usr/bin/bash -c "kill -9 $(ps ux | grep dash -i | grep -v system | grep -v journal | awk '{print $2}')"
 
 # Restart every >2 seconds to avoid StartLimitInterval failure

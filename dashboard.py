@@ -129,7 +129,6 @@ def power_columns(refresh_button_state=None):
 		 pn.Spacer(width=100),
 		 pn.Spacer(sizing_mode='stretch_width'))
 
-    # %%
     #####################################################################
     # ....Column of time-series plots of battery and power variables
     #overlay = hv.Curve([1, 2, 3], vdims=['A']) * hv.Curve([2, 3, 4], vdims=['A']) * hv.Curve([3, 2, 1], vdims=['B'])
@@ -235,31 +234,11 @@ def create_tabs():
     #power_title   = pn.pane.Markdown('# ICECAPS MELT — MVP Dashboard' ) 
     tabs          = pn.Tabs(('Minimum Viable Powersupply', pn.Column(pcs)))
 
-    # %%
     #################### INSTRUMENT UPTIME #####################
     tabs.append(('Instrument Uptime', pn.pane.Markdown('# Coming soon...')))
 
-    # %%
-    #################### NEAR-SURFACE METEOROLOGY #####################
-    tabs.append(('Near-surface Meteorology', pn.pane.Markdown('# Coming soon...')))
-
-    # %%
-    #################### SURFACE ENERGY BUDGET #####################
-    tabs.append(('Surface Energy Budget', pn.pane.Markdown('# Coming soon...')))
-
-    # %%
-    #################### CLOUD PROPERTIES #####################
-    tabs.append(('Cloud Properties', pn.pane.Markdown('# Coming soon...')))
-
     tabs.append(('CL61', tab_cl61.tab_cl61()))
     tabs.append(('ASFS', tab_asfs.tab_asfs()))
-
-    # %%
-    tabs.append(('CL61', tab_cl61()))
-
-    #tabs.servable(title='ICECAPS SLEIGH-MVP Dashboard')
-    #tabs.servable(title='ICECAPS SLEIGH-MVP Dashboard')
-    #tabs.show()
 
     return tabs
 
@@ -336,5 +315,4 @@ def main():
 # to come after the main code so it presents in a more logical, C-like, way
 # https://stackoverflow.com/questions/11241523/why-does-python-code-run-faster-in-a-function
 if __name__ == '__main__':
-
     main()

@@ -72,8 +72,8 @@ def tab_asfs():
     ).opts(hooks=[set_border_fill_color])
 
 
-    ds['lw_net'] = ds['ir20_lwd_Wm2_Avg'] - ds['ir20_lwu_Wm2_Avg']
-    ds['sw_net'] = ds['sr30_swd_IrrC_Avg'] - ds['sr30_swu_IrrC_Avg']
+    ds['lw_net'] = ds['ir20_lwd_Wm2_Avg'] + ds['ir20_lwu_Wm2_Avg']
+    ds['sw_net'] = ds['sr30_swd_IrrC_Avg'] + ds['sr30_swu_IrrC_Avg']
     ds['rad_net'] = ds['lw_net'] + ds['sw_net']
     p_rad = ds['rad_net'].hvplot.scatter(
         **OPTS_TALLER, title='RADIATION [W/m2]', label='NET', color='olivedrab'

@@ -239,6 +239,9 @@ def create_tabs():
 
     tabs.append(('CL61', tab_cl61.tab_cl61()))
     tabs.append(('ASFS', tab_asfs.tab_asfs()))
+    tabs.append(('MRR', pn.pane.Markdown('# Coming soon...')))
+    tabs.append(('MWR', pn.pane.Markdown('# Coming soon...')))
+    tabs.append(('BLE', pn.pane.Markdown('# Coming soon...')))
 
     return tabs
 

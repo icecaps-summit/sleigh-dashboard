@@ -3,6 +3,7 @@
 . ~/.profile
 . ~/.bashrc
 
+conda activate sleigh-dashboard
 # run the dashboard panel/bokeh/websocket python script for displaying sleigh+mvp info
 while true
 do 

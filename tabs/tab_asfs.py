@@ -21,7 +21,7 @@ def tab_asfs():
     ds = load_asfs()
 
     # title to the tab
-    p0 = pn.pane.Markdown('# Automated Surface Flux Station')
+    p0 = pn.pane.Markdown('# Automated Surface Flux Station:')
     title = pn.Row(p0)
 
     ######################## DATETIME RANGE SELECTION ###########################

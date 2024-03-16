@@ -9,34 +9,27 @@ import panel as pn
 import datetime as dt
 import os
 
+import warnings
+warnings.filterwarnings("ignore")
+
 def load_cl61():
     dir_cl61 = '/data/cl61/daily'
     files_cl61 = [os.path.join( dir_cl61,f ) for f in os.listdir(dir_cl61) if 'summary_cl61' in f]
 
     # Does a preprocess function need including?
     # Do we need to specify the dimension along which to concatenate (hopefully not)
+    print('attempting load:')
     ds = xr.open_mfdataset(files_cl61)
+    print('success')
 
     return ds
 
-def tab_cl61():
+def tab_cl61(dtrange=(None, None)):
     ds = load_cl61()
 
     # title to the tab
     p0 = pn.pane.Markdown('CL61 Vaisalla Ceilometer')
     title = pn.Row(p0)
-
-    ######################## DATETIME RANGE SELECTION ###########################
-    #############################################################################
-
-    '''
-    # the following dtrange goes from the start of yesterday to the end of yesterday. This should be the latest day of available data...
-    dtrange = ( dt.datetime.today().date() - dt.timedelta(days=2), dt.datetime.today().date() )
-    dt_range_picker = pn.widgets.DatetimeRangePicker(name='Datetime range:', value=dtrange, enable_seconds=False)
-    '''
-    dttd = dt.datetime.today()
-    start_of_today = dt.datetime(dttd.year, dttd.month, dttd.day)
-    dtrange = ( start_of_today - dt.timedelta(days=2), start_of_today )
     ######################## CLOUD HEIGHT INFORMATION ###########################
     #############################################################################
 
@@ -83,7 +76,7 @@ def tab_cl61():
         return new_ds
 
 
-
+    '''
     VARS_nullrate = (v for v in ds.variables if '_nullrate' in v)
     ds_nullrate = unstack_xarray_dataset_by_dim(ds[[*VARS_nullrate]], 'layer')
     df_heatmap = ds_nullrate.to_dataframe(dim_order=('time',))#.astype({'time':np.datetime64})
@@ -91,8 +84,11 @@ def tab_cl61():
     #p_nullrate = df_heatmap.hvplot.heatmap(x='index',height=400, responsive=True)
     #p_nullrate = df_heatmap.hvplot.scatter(x='time', height=400).opts(ylim=(-0.1,1.1), xlim=dtrange)
     p_nullrate = df_heatmap.hvplot.heatmap(height=500, ylim=dtrange, rot=70, xaxis='top')
-
+    '''
+    p_nullrate = pn.pane.Markdown('## nullrate coming soon')
 
     # include all elements to be displayed in the returned pn.Column object
     display = pn.Column(title,p1_tgt, p1_src, p_nullrate, p2)#, p3)#dt_range_picker, p1)
-    return display 
+
+    left_spacer = pn.Column(width=10)
+    return pn.Row(left_spacer, display, left_spacer) 

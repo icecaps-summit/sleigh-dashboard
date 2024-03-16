@@ -9,6 +9,9 @@ import datetime as dt
 import os
 import traceback
 
+import warnings
+warnings.filterwarnings("ignore")
+
 def load_mrr():
     dir_mrr = '/data/mrr/'
     files_mrr = [os.path.join( dir_mrr,f ) for f in os.listdir(dir_mrr) if 'summary_mrr' in f]
@@ -18,11 +21,11 @@ def load_mrr():
     ds = xr.open_mfdataset(files_mrr).load()
     return ds
 
-def tab_mrr():
+def tab_mrr(dtrange=(None, None)):
     ds = load_mrr()
 
-    OPTS_scatter = {'x':'time', 's':2, 'height':250, 'responsive':True, 'grid':True, 'padding':0.1}
-    OPTS_2d = {'x':'time', 'y':'range_bins','height':400, 'responsive':True, 'padding':0.1}
+    OPTS_scatter = {'x':'time', 's':2, 'height':250, 'responsive':True, 'grid':True, 'padding':0.1, 'xlim':dtrange}
+    OPTS_2d = {'x':'time', 'y':'range_bins','height':400, 'responsive':True, 'padding':0.1, 'xlim':dtrange}
     OPTS_taller = {k:v for k,v in OPTS_scatter.items()}
     OPTS_taller['height'] = 400
 
@@ -47,10 +50,22 @@ def tab_mrr():
 
     # ['time', 'range_bins', 'time_count', 'Z_median', 'VEL_median', 'WIDTH_median', 'Z_std', 'VEL_std', 'WIDTH_std', 'RR_mean', 'LWC_meansum', 'Z_nullrate', 'VEL_nullrate', 'WIDTH_nullrate', 'RR_nullrate', 'LWC_nullrate']
     var_plots.append(
-        ds.Z_median.hvplot.quadmesh(title='Z median',**OPTS_2d)
+        ds.Z_median.hvplot(title='Z median',**OPTS_2d, cmap='viridis')
+    )
+    var_plots.append(
+        ds.VEL_median.hvplot(title='VEL median', **OPTS_2d, cmap='magma')
+    )
+    var_plots.append(
+        ds.WIDTH_median.hvplot(title='WIDTH median', **OPTS_2d, cmap='magma')
+    )
+    #var_plots.append(
+    #    ds.RR_mean.hvplot.scatter(title='Rainfall Rate mean', **OPTS_scatter, ylabel='Rainfall Rate')
+    #)
+    var_plots.append(
+        ds.LWC_meansum.hvplot.scatter(title='LWC mean', **OPTS_scatter)
     )
 
     left_spacer = pn.Column(width=20)
     TAB = pn.Column(pn.pane.Markdown('# Coming soon?'), *var_plots)
 
-    return pn.Row(left_spacer, TAB)
+    return pn.Row(left_spacer, TAB, left_spacer)

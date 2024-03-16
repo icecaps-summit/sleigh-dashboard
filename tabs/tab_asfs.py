@@ -8,6 +8,9 @@ import panel as pn
 import datetime as dt
 import os
 
+import warnings
+warnings.filterwarnings("ignore")
+
 def load_asfs():
     dir_asfs = '/data/asfs/'
     files_asfs = [os.path.join( dir_asfs,f ) for f in os.listdir(dir_asfs) if 'summary_asfs_sci' in f]
@@ -17,27 +20,16 @@ def load_asfs():
     ds = xr.open_mfdataset(files_asfs)
     return ds
 
-def tab_asfs():
+def tab_asfs(dtrange = (None,None)):
     ds = load_asfs()
 
     # title to the tab
     p0 = pn.pane.Markdown('# Automated Surface Flux Station:')
     title = pn.Row(p0)
 
-    ######################## DATETIME RANGE SELECTION ###########################
-    #############################################################################
-
-    '''
-    # the following dtrange goes from the start of yesterday to the end of yesterday. This should be the latest day of available data...
-    dtrange = ( dt.datetime.today().date() - dt.timedelta(days=2), dt.datetime.today().date() )
-    dt_range_picker = pn.widgets.DatetimeRangePicker(name='Datetime range:', value=dtrange, enable_seconds=False)
-    '''
-    dttd = dt.datetime.today()
-    start_of_today = dt.datetime(dttd.year, dttd.month, dttd.day)
-    dtrange = ( start_of_today - dt.timedelta(days=2), start_of_today )
     ######################## ALL VARIABLES PLOT #################################
     #############################################################################
-    OPTS_SCATTER = {'x':'time', 's':2, 'height':250, 'responsive':True, 'grid':True, 'padding':0.1}
+    OPTS_SCATTER = {'x':'time', 's':2, 'height':250, 'responsive':True, 'grid':True, 'padding':0.1, 'xlim':dtrange}
     
     OPTS_TALLER = {k:v for k,v in OPTS_SCATTER.items()}
     OPTS_TALLER['height'] = 400
@@ -163,7 +155,7 @@ def tab_asfs():
     #    )
 
     # include all elements to be displayed in the returned pn.Column object
-    display = pn.Column(title,pn.Column(p_scantime, p_boxtemp, p_sw_cal, p_lw_cal, p_rad, p_plate_flux, p_gas_density, p_licor_sig, p_snow_acoustic, p_metek_wind, p_metek_incl, p_sw_tach, p_sw_heatcurr, p_lw_heatv), scroll=True)#, *var_plots)
+    display = pn.Column(title,pn.Column(p_scantime, p_boxtemp, p_sw_cal, p_lw_cal, p_rad, p_plate_flux, p_gas_density, p_licor_sig, p_snow_acoustic, p_metek_wind, p_metek_incl, p_sw_tach, p_sw_heatcurr, p_lw_heatv))#, *var_plots)
     left_spacer = pn.Column(width=20)
     display = pn.Row(left_spacer, display, left_spacer)
     return display 

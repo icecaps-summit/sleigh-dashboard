@@ -24,8 +24,8 @@ def load_mrr():
 def tab_mrr(dtrange=(None, None)):
     ds = load_mrr()
 
-    OPTS_scatter = {'x':'time', 's':2, 'height':250, 'responsive':True, 'grid':True, 'padding':0.1, 'xlim':dtrange}
-    OPTS_2d = {'x':'time', 'y':'range_bins','height':400, 'responsive':True, 'padding':0.1, 'xlim':dtrange, 'ylabel': 'Height AGL (m)'}
+    OPTS_scatter = {'x':'time', 's':2, 'height':250, 'responsive':True, 'grid':True, 'padding':0.1, 'xlim':dtrange, 'xlabel':'time'}
+    OPTS_2d = {'x':'time', 'y':'range_bins','height':400, 'responsive':True, 'padding':0.1, 'xlim':dtrange, 'ylabel': 'Height AGL (m)', 'xlabel':'time'}
     OPTS_taller = {k:v for k,v in OPTS_scatter.items()}
     OPTS_taller['height'] = 400
 
@@ -56,16 +56,16 @@ def tab_mrr(dtrange=(None, None)):
         ds.VEL_median.hvplot(title='Doppler VEL median (m/s)', **OPTS_2d, cmap='RdBu', clim=(-10,10))
     )
     var_plots.append(
-        ds.WIDTH_median.hvplot(title='Doppler WIDTH median (m/s)', **OPTS_2d, cmap='magma', clim=(0,5))
+        ds.WIDTH_median.hvplot(title='Doppler WIDTH median (m/s)', **OPTS_2d, cmap='magma', clim=(5e-3,5), cnorm='log')
     )
     #var_plots.append(
-    #    ds.RR_mean.hvplot.scatter(title='Rainfall Rate mean', **OPTS_scatter, ylabel='Rainfall Rate')
+    #    ds.RR_mean.hvplot.scatter(x='time', title='Rainfall Rate mean', ylabel='Rainfall Rate')#, **OPTS_scatter
     #)
+    print(f'{ds.RR_mean.dims=}')
     var_plots.append(
-        ds.LWC_meansum.hvplot.scatter(title='LWC mean', **OPTS_scatter)
+        ds.LWC_meansum.hvplot.scatter(title='LWP mean (g/m2) -- derived from LWC', **OPTS_scatter)
     )
 
     left_spacer = pn.Column(width=20)
-    TAB = pn.Column(pn.pane.Markdown('# Coming soon?'), *var_plots)
-
+    TAB = pn.Column(pn.pane.Markdown('# Micro Rain Radar (MRR)'), *var_plots)
     return pn.Row(left_spacer, TAB, left_spacer)

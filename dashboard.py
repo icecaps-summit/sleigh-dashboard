@@ -50,13 +50,16 @@ def create_tabs():
     #################### INSTRUMENT UPTIME #####################
     tabs.append(('Instrument Uptime', pn.pane.Markdown('# Coming soon...')))
 
-    t_cl61 = pn.bind(tab_cl61.tab_cl61, dtrange=datetimerange_select)
+    ds_cl61 = tab_cl61.load_cl61()
+    t_cl61 = pn.bind(tab_cl61.tab_cl61, dtrange=datetimerange_select, ds=ds_cl61)
     tabs.append(('CL61', t_cl61))
     
-    t_asfs = pn.bind(tab_asfs.tab_asfs, dtrange=datetimerange_select)
+    ds_asfs = tab_asfs.load_asfs()
+    t_asfs = pn.bind(tab_asfs.tab_asfs, dtrange=datetimerange_select, ds=ds_asfs)
     tabs.append(('ASFS', t_asfs))
 
-    t_mrr = pn.bind(tab_mrr.tab_mrr, dtrange=datetimerange_select)
+    ds_mrr = tab_mrr.load_mrr()
+    t_mrr = pn.bind(tab_mrr.tab_mrr, dtrange=datetimerange_select, ds=ds_mrr)
     tabs.append(('MRR', t_mrr))
     
     tabs.append(('MWR', pn.pane.Markdown('# Coming soon...')))
@@ -73,8 +76,8 @@ def create_tabs():
 def launch_server_process(panel_dict):
 
     server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
-                             port=6646, websocket_origin="*", show=False) # deployment
-                             #port=5006, websocket_origin='*', show=False) # testing
+                             #port=6646, websocket_origin="*", show=False) # deployment
+                             port=5006, websocket_origin='*', show=False) # testing
     return True # not necessary but explicit
 
 

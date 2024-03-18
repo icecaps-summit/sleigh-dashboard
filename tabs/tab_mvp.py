@@ -45,40 +45,19 @@ def power_columns_wrapper(button_status, dtrange=(None, None)):
         print_traceback(traceback.format_exc(), f"FAILURE")
 
 
-def get_power_data(start_date, end_date, data_dir='/data/power/level2/'):
-
-    import glob
-
-    data_list = []
-
-    ds_list = []
-    for curr_date in pd.date_range(start_date, end_date+datetime.timedelta(0)):
-        data_list+=glob.glob(f'{data_dir}/power.mvp.level2.1min.'+curr_date.strftime('%Y%m%d')+ '.*.nc')
-        ds = xr.open_dataset(glob.glob(f'{data_dir}/power.mvp.level2.1min.'+curr_date.strftime('%Y%m%d')+ '.*.nc')[0])
-        ds_list.append(ds)
-#    power = xr.open_mfdataset(data_list, drop_variables=['num_batts_installed, BattsOnline'])
-    
-    power = xr.concat(ds_list, dim='time')
-
-    # ... select the requested range only... 
-    power = power.sel(time=slice(start_date.to_datetime64(), end_date.to_datetime64()))
-
-    return power.load()
-
-
 def power_columns(refresh_button_state=None, dtrange=(None, None)):
 
     print(refresh_button_state, type(refresh_button_state))
 
     #####################################################################
     # ....Determine today's and yesterday's dates
-    today     = pd.Timestamp.now('UTC')
+    today     = pd.Timestamp.now()#'UTC')
     start = pd.Timestamp(dtrange[0])
-    end = pd.Timestamp(dtrange[1])
+    #end = pd.Timestamp(dtrange[1])
 
     #####################################################################
     # ....Read data from SLEIGH and MVP
-    power = get_power_data(start, end, data_dir='/data/power/level2/')
+    power = get_power_data(start, today, data_dir='/data/power/level2/')
 
     # get some info about how new the data is on the server
     tz            = datetime.timezone(datetime.timedelta(seconds=0))
@@ -257,6 +236,27 @@ def power_columns(refresh_button_state=None, dtrange=(None, None)):
     #col.servable()
 
     return pn.Column(pn.Column(row), col)
+
+
+def get_power_data(start_date, end_date, data_dir='/data/power/level2/'):
+
+    import glob
+
+    data_list = []
+
+    ds_list = []
+    for curr_date in pd.date_range(start_date, end_date+datetime.timedelta(0)):
+        data_list+=glob.glob(f'{data_dir}/power.mvp.level2.1min.'+curr_date.strftime('%Y%m%d')+ '.*.nc')
+        ds = xr.open_dataset(glob.glob(f'{data_dir}/power.mvp.level2.1min.'+curr_date.strftime('%Y%m%d')+ '.*.nc')[0])
+        ds_list.append(ds)
+#    power = xr.open_mfdataset(data_list, drop_variables=['num_batts_installed, BattsOnline'])
+    
+    power = xr.concat(ds_list, dim='time')
+
+    # ... select the requested range only... 
+    power = power.sel(time=slice(start_date.to_datetime64(), end_date.to_datetime64()))
+
+    return power.load()
 
 
 def print_traceback(thetb, error_msg):

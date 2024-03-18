@@ -24,8 +24,8 @@ def load_cl61():
 
     return ds
 
-def tab_cl61(dtrange=(None, None)):
-    ds = load_cl61()
+def tab_cl61(ds, dtrange=(None, None)):
+    #ds = load_cl61()
 
     # title to the tab
     p0 = pn.pane.Markdown('CL61 Vaisalla Ceilometer')

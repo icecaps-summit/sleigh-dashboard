@@ -20,8 +20,8 @@ def load_asfs():
     ds = xr.open_mfdataset(files_asfs)
     return ds
 
-def tab_asfs(dtrange = (None,None)):
-    ds = load_asfs()
+def tab_asfs(ds, dtrange = (None,None)):
+    #ds = load_asfs()
 
     # title to the tab
     p0 = pn.pane.Markdown('# Automated Surface Flux Station:')

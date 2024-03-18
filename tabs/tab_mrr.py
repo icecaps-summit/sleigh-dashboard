@@ -21,8 +21,8 @@ def load_mrr():
     ds = xr.open_mfdataset(files_mrr).load()
     return ds
 
-def tab_mrr(dtrange=(None, None)):
-    ds = load_mrr()
+def tab_mrr(ds, dtrange=(None, None)):
+    #ds = load_mrr()
 
     OPTS_scatter = {'x':'time', 's':2, 'height':250, 'responsive':True, 'grid':True, 'padding':0.1, 'xlim':dtrange, 'xlabel':'time'}
     OPTS_2d = {'x':'time', 'y':'range_bins','height':400, 'responsive':True, 'padding':0.1, 'xlim':dtrange, 'ylabel': 'Height AGL (m)', 'xlabel':'time'}

@@ -93,7 +93,7 @@ def print_traceback(thetb, error_msg):
 def main():
     while True:           
         try:
-            tabs = create_tabs()
+            tabs = create_tabs
             
             panel_dict = {'dashboard': tabs} # if you make other pages, add them here... 
 

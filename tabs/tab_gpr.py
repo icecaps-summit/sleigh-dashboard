@@ -33,7 +33,7 @@ def tab_gpr(ds, dtrange=(None, None)):
     #ds = load_mrr()
 
     OPTS_scatter = {'x':'time', 's':2, 'height':250, 'responsive':True, 'grid':True, 'padding':0.1, 'xlim':dtrange, 'xlabel':'time'}
-    OPTS_2d = {'x':'time', 'y':'step', 'height':400, 'responsive':True, 'padding':0.1, 'xlim':dtrange, 'ylabel': 'Height AGL (m)', 'xlabel':'time'}
+    OPTS_2d = {'x':'time', 'y':'step', 'height':400, 'responsive':True, 'padding':0.1, 'xlim':dtrange, 'ylabel': 'step', 'xlabel':'time', 'flip_yaxis':True}
     OPTS_taller = {k:v for k,v in OPTS_scatter.items()}
     OPTS_taller['height'] = 400
 
@@ -57,11 +57,17 @@ def tab_gpr(ds, dtrange=(None, None)):
             var_plots.append( pn.pane.Markdown(f'## {v}: failed\n{traceback.format_exc(e)}') )
 
     p_combDM = ds['DM_mean_5'].hvplot(
-        title='DM', **OPTS_2d
+        title='Combined DM mean', **OPTS_2d
     ) * ds['DM_mean_7'].hvplot(
         **OPTS_2d
     )
 
+    p_comb_DM_std = ds['DM_std_5'].hvplot(
+        title='Combined DM std', **OPTS_2d
+    ) * ds['DM_std_7'].hvplot(
+        **OPTS_2d
+    )
+
     left_spacer = pn.Column(width=20)
-    TAB = pn.Column(pn.pane.Markdown('# GPR'), p_combDM, *var_plots)
+    TAB = pn.Column(pn.pane.Markdown('# GPR'), p_combDM, p_comb_DM_std, *var_plots)
     return pn.Row(left_spacer, TAB, left_spacer)

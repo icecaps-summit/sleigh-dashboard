@@ -86,8 +86,8 @@ def create_tabs():
 def launch_server_process(panel_dict):
 
     server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
-                             #port=6646, websocket_origin="*", show=False) # deployment
-                             port=5006, websocket_origin='*', show=False) # testing
+                             port=6646, websocket_origin="*", show=False) # deployment
+                             #port=5006, websocket_origin='*', show=False) # testing
     return True # not necessary but explicit
 
 

@@ -27,6 +27,7 @@ def load_cl61():
 def tab_cl61(ds, dtrange=(None, None)):
     #ds = load_cl61()
 
+    OPTS_2d = {'x':'time', 'y':'range','height':400, 'responsive':True, 'padding':0.1, 'xlim':dtrange, 'ylabel': 'Height AGL (m)', 'xlabel':'time'}
     # title to the tab
     p0 = pn.pane.Markdown('CL61 Vaisalla Ceilometer')
     title = pn.Row(p0)
@@ -87,8 +88,17 @@ def tab_cl61(ds, dtrange=(None, None)):
     '''
     p_nullrate = pn.pane.Markdown('## nullrate coming soon')
 
+
+    p_backscatter = ds['beta_att_mean'].hvplot(
+        title='mean Attenuated backscatter', **OPTS_2d, cnorm='log', clim=(1e-6, 1e-2)
+    )
+
+    p_lindepol = ds['linear_depol_ratio_median'].hvplot(
+        title='median linear depolarisation ratio', **OPTS_2d, clim=(0,1)
+    )
+
     # include all elements to be displayed in the returned pn.Column object
-    display = pn.Column(title,p1_tgt, p1_src, p_nullrate, p2)#, p3)#dt_range_picker, p1)
+    display = pn.Column(title,p1_tgt, p1_src, p_nullrate, p2, p_backscatter, p_lindepol)#, p3)#dt_range_picker, p1)
 
     left_spacer = pn.Column(width=10)
     return pn.Row(left_spacer, display, left_spacer) 

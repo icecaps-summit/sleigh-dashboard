@@ -13,6 +13,7 @@ from tabs import tab_asfs
 from tabs import tab_mrr
 from tabs import tab_mvp
 from tabs import tab_simba
+from tabs import tab_gpr
 
 pn.extension(design='material', template='material')
 
@@ -54,6 +55,7 @@ def create_tabs():
     ds_asfs = tab_asfs.load_asfs()
     ds_mrr = tab_mrr.load_mrr()
     ds_simba = tab_simba.load_simba()
+    ds_gpr = tab_gpr.load_gpr()
 
     t_cl61 = pn.bind(tab_cl61.tab_cl61, dtrange=datetimerange_select, ds=ds_cl61)
     tabs.append(('CL61', t_cl61))
@@ -66,6 +68,9 @@ def create_tabs():
 
     t_simba = pn.bind(tab_simba.tab_simba, dtrange=datetimerange_select, ds=ds_simba)
     tabs.append(('SIMBA', t_simba))
+
+    t_gpr = pn.bind(tab_gpr.tab_gpr, dtrange=datetimerange_select, ds=ds_gpr)
+    tabs.append(('GPR', t_gpr))
     
     tabs.append(('MWR', pn.pane.Markdown('# Coming soon...')))
     tabs.append(('BLE', pn.pane.Markdown('# Coming soon...')))

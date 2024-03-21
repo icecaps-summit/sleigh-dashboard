@@ -12,6 +12,7 @@ from tabs import tab_cl61
 from tabs import tab_asfs
 from tabs import tab_mrr
 from tabs import tab_mvp
+from tabs import tab_simba
 
 pn.extension(design='material', template='material')
 
@@ -29,7 +30,6 @@ warning_color = 'khaki'
 happy_color   = 'mediumseagreen'
 
 pn.extension('echarts', template='fast', nthreads=4, notifications=False)
-
 
 def create_tabs():
     # create the datetimerange picker and update button that appear on all tabs
@@ -51,16 +51,21 @@ def create_tabs():
     tabs.append(('Instrument Uptime', pn.pane.Markdown('# Coming soon...')))
 
     ds_cl61 = tab_cl61.load_cl61()
+    ds_asfs = tab_asfs.load_asfs()
+    ds_mrr = tab_mrr.load_mrr()
+    ds_simba = tab_simba.load_simba()
+
     t_cl61 = pn.bind(tab_cl61.tab_cl61, dtrange=datetimerange_select, ds=ds_cl61)
     tabs.append(('CL61', t_cl61))
     
-    ds_asfs = tab_asfs.load_asfs()
     t_asfs = pn.bind(tab_asfs.tab_asfs, dtrange=datetimerange_select, ds=ds_asfs)
     tabs.append(('ASFS', t_asfs))
-
-    ds_mrr = tab_mrr.load_mrr()
+    
     t_mrr = pn.bind(tab_mrr.tab_mrr, dtrange=datetimerange_select, ds=ds_mrr)
     tabs.append(('MRR', t_mrr))
+
+    t_simba = pn.bind(tab_simba.tab_simba, dtrange=datetimerange_select, ds=ds_simba)
+    tabs.append(('SIMBA', t_simba))
     
     tabs.append(('MWR', pn.pane.Markdown('# Coming soon...')))
     tabs.append(('BLE', pn.pane.Markdown('# Coming soon...')))
@@ -76,8 +81,8 @@ def create_tabs():
 def launch_server_process(panel_dict):
 
     server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
-                             port=6646, websocket_origin="*", show=False) # deployment
-                             #port=5006, websocket_origin='*', show=False) # testing
+                             #port=6646, websocket_origin="*", show=False) # deployment
+                             port=5006, websocket_origin='*', show=False) # testing
     return True # not necessary but explicit
 
 
@@ -94,7 +99,7 @@ def main():
     while True:           
         try:
             tabs = create_tabs
-            
+            print(f'{type(tabs)=}')
             panel_dict = {'dashboard': tabs} # if you make other pages, add them here... 
 
             p = Process(target=launch_server_process, args=(panel_dict,))

@@ -25,8 +25,6 @@ def load_cl61():
     return ds
 
 def tab_cl61(ds, dtrange=(None, None)):
-    #ds = load_cl61()
-
     OPTS_2d = {'x':'time', 'y':'range','height':400, 'responsive':True, 'padding':0.1, 'xlim':dtrange, 'ylabel': 'Height AGL (m)', 'xlabel':'time'}
     # title to the tab
     p0 = pn.pane.Markdown('CL61 Vaisalla Ceilometer')
@@ -38,27 +36,8 @@ def tab_cl61(ds, dtrange=(None, None)):
         height=400, grid=True, responsive=True,
         title='INSTRUMENT UPTIME', ylabel='records per 15 minutes'
     )
-    p1_tgt = p1.relabel('INSTRUMENT UPTIME').opts(height=400)
-    p1_src = p1.opts(height=50, yaxis=None, default_tools=[], shared_axes=False, ylim=(-1,16))
-    hv.plotting.links.RangeToolLink(
-        p1_src, p1_tgt, axes=['x', 'y'], boundsx=dtrange, boundsy=(None, None)
-    )
     #l=(p1_tgt + p1_src).cols(1)
     #l.opts(hv.opts.Layout(shared_axes=False, merge_tools=False))
-
-    ds['zero'] = 1e-10*ds.cloud_thickness_mean
-    p2 = ds.hvplot.scatter(x='time', y='cloud_base_heights_mean', by='layer',
-        s=2, color='blue', label='CBH', xlim=dtrange,
-        height=400, grid=True, responsive=True,
-        title='CLOUD LOCATION'
-    ) * ds.hvplot.errorbars(x='time', y='cloud_base_heights_mean', yerr1='zero', yerr2='cloud_thickness_mean', by='layer', label='CBH', xlim=dtrange,
-        color='orange',
-        height=400, grid=True, responsive=True
-    )
-    #p1 = pn.bind(pf1, dtrange=dt_range_picker)
-
-    #p3 = ds.cloud_thickness_mean.hvplot.scatter(x='time', by='layer')
-
 
     #################### DATA STREAM NULLRATE ###############################
 
@@ -86,19 +65,35 @@ def tab_cl61(ds, dtrange=(None, None)):
     #p_nullrate = df_heatmap.hvplot.scatter(x='time', height=400).opts(ylim=(-0.1,1.1), xlim=dtrange)
     p_nullrate = df_heatmap.hvplot.heatmap(height=500, ylim=dtrange, rot=70, xaxis='top')
     '''
-    p_nullrate = pn.pane.Markdown('## nullrate coming soon')
 
-
-    p_backscatter = ds['beta_att_mean'].hvplot(
-        title='mean Attenuated backscatter', **OPTS_2d, cnorm='log', clim=(1e-6, 1e-2)
+    plot_cloud_bases = ds[['cloud_base_heights_mean']].hvplot.scatter(
+        x='time', y='cloud_base_heights_mean', by='layer',
+        s=5, color='white', label='CBH', xlim=dtrange,
+        height=OPTS_2d['height'], responsive=True, legend=False
     )
+    
+    plot_backscatter = ds['beta_att_mean'].hvplot(
+        title='mean Attenuated backscatter', **OPTS_2d, cnorm='log', clim=(1e-8, 1e-2), ylim=(0,5000),
+        cmap='viridis'
+    )
+    def backscatter_base_heights(show_base_heights):
+        plist = [plot_backscatter]
+        if show_base_heights:
+            plist = plist + [plot_cloud_bases]
+        return hv.Overlay(plist).opts(ylim=(0,5000), xlim=dtrange)
+
+    toggle = pn.widgets.Switch(name='Include cloud base heights', value=True)
+
+    p_backscatter = pn.panel(pn.bind(backscatter_base_heights, show_base_heights=toggle), loading_indicator=True)
 
     p_lindepol = ds['linear_depol_ratio_median'].hvplot(
         title='median linear depolarisation ratio', **OPTS_2d, clim=(0,1)
     )
 
     # include all elements to be displayed in the returned pn.Column object
-    display = pn.Column(title,p1_tgt, p1_src, p_nullrate, p2, p_backscatter, p_lindepol)#, p3)#dt_range_picker, p1)
+    display = pn.Column(title, 
+        p1, toggle, p_backscatter, p_lindepol, plot_cloud_bases
+    )
 
     left_spacer = pn.Column(width=10)
     return pn.Row(left_spacer, display, left_spacer) 

@@ -57,18 +57,23 @@ def create_tabs():
     ds_simba = tab_simba.load_simba()
     ds_gpr = tab_gpr.load_gpr()
 
+    print('tcl61')
     t_cl61 = pn.bind(tab_cl61.tab_cl61, dtrange=datetimerange_select, ds=ds_cl61)
     tabs.append(('CL61', t_cl61))
     
+    print('tasfs')
     t_asfs = pn.bind(tab_asfs.tab_asfs, dtrange=datetimerange_select, ds=ds_asfs)
     tabs.append(('ASFS', t_asfs))
     
+    print('tmrr')
     t_mrr = pn.bind(tab_mrr.tab_mrr, dtrange=datetimerange_select, ds=ds_mrr)
     tabs.append(('MRR', t_mrr))
 
+    print('tsimba')
     t_simba = pn.bind(tab_simba.tab_simba, dtrange=datetimerange_select, ds=ds_simba)
     tabs.append(('SIMBA', t_simba))
 
+    print('tgpr')
     t_gpr = pn.bind(tab_gpr.tab_gpr, dtrange=datetimerange_select, ds=ds_gpr)
     tabs.append(('GPR', t_gpr))
     
@@ -103,7 +108,9 @@ def print_traceback(thetb, error_msg):
 def main():
     while True:           
         try:
+            print('creating tabs')
             tabs = create_tabs
+            print('tabs created')
             print(f'{type(tabs)=}')
             panel_dict = {'dashboard': tabs} # if you make other pages, add them here... 
 
@@ -123,6 +130,9 @@ def main():
 
         except Exception as e:
             print(e)
+
+        finally:
+            p.terminate()
 
 
 # this runs the function main as the main program... functions

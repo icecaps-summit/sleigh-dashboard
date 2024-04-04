@@ -88,11 +88,10 @@ def create_tabs():
     return display
 
 
-def launch_server_process(panel_dict):
+def launch_server_process(panel_dict, port):
 
     server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
-                             port=6646, websocket_origin="*", show=False) # deployment
-                             #port=5006, websocket_origin='*', show=False) # testing
+                             port=port, websocket_origin='*', show=False)
     return True # not necessary but explicit
 
 
@@ -105,7 +104,7 @@ def print_traceback(thetb, error_msg):
     print(f"!!! ———————————————————————————————————————————————————————— !!! " , file=sys.stderr)
 
 
-def main():
+def main(port=6646):
     while True:           
         try:
             print('creating tabs')
@@ -114,7 +113,7 @@ def main():
             print(f'{type(tabs)=}')
             panel_dict = {'dashboard': tabs} # if you make other pages, add them here... 
 
-            p = Process(target=launch_server_process, args=(panel_dict,))
+            p = Process(target=launch_server_process, args=(panel_dict,port))
             p.start()
             for s in range(0,6000):
                 if s % 600 ==0 : print("... we could do work here... but we're still alive")
@@ -139,4 +138,15 @@ def main():
 # to come after the main code so it presents in a more logical, C-like, way
 # https://stackoverflow.com/questions/11241523/why-does-python-code-run-faster-in-a-function
 if __name__ == '__main__':
-    main()
+    PORT = 6646
+
+    import argparse
+    parser = argparse.ArgumentParser(description='Run the dashboard to display the summarised data from the ICECAPS MELT Raven 2024 deployment.')
+    parser.add_argument('-pd', action='store_true', help="Include this flag to chnage the port from 6646 (deployment) to 5006 (pre-deployment).")
+    #parser.add_argument('')
+    args = parser.parse_args()
+    pd = args.pd
+    if pd:
+        PORT = 5006
+    
+    main(port=PORT)

@@ -11,7 +11,7 @@ import os
 class DataLoader:
     '''DataLoader is a class that loads .nc files from a specific directory with a given filename format. The class can be provided with a datetime range, from which the data is loaded (rather than lodading all available files).
     
-    ATTRS:
+    ATTRIBUTES:
         name: str
         dir: str
         fname_fmt: str
@@ -70,6 +70,7 @@ class DataLoader:
         dtr: tuple[dt.datetime, dt.datetime]
     ) -> None:
         '''Function that takes a datetime range, and updates the DataLoaders stored data attribute if the requested data isn't already loaded.'''
+        print(f'DataLoader {self.name}.update_data: called')
         # get all the required files for loading the datetime range
         flist_dtr = self._get_files_from_dtr(dtr)
         flist_to_load = [f for f in flist_dtr if f not in self.loaded_files]
@@ -104,11 +105,3 @@ class DataLoader:
             flist.append( dt0.strftime(self.fname_fmt) )
             dt0 += one_day
         return flist
-    
-DL_cl61 = DataLoader('cl61', '/data/cl61/daily', 'summary_cl61_%Y%m%d.nc')
-DL_mrr = DataLoader('mrr', '/data/mrr', 'summary_mrr_%Y%m%d.nc')
-
-DL_all = {
-    'cl61': DL_cl61,
-    'mrr': DL_mrr
-}

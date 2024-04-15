@@ -25,7 +25,7 @@ class Dashboard:
     def __init__(self, 
         dtp_args: dict,
         dict_DL: dict[str: DataLoader],
-        tabview: TabView
+        tabview: callable
     ):
         '''Initialisation function
         
@@ -38,7 +38,8 @@ class Dashboard:
         self.compare = pn.widgets.Switch(name='Compare', value=False)
 
         self.dld = dict_DL
-        self.tabview = tabview
+        self.tabview_func = tabview
+        self.tabview = tabview()
 
         self.tabview.bind_gdtp(self.gdtp)
 
@@ -57,9 +58,14 @@ class Dashboard:
         left_spacer = pn.Spacer(width=40)
 
         def main_content(compare):
-            tabs_in_row = [self.tabview]
+            tabs_in_row = [pn.Spacer(width=20),self.tabview]
             if compare:
-                tabs_in_row += pn.Tabs(self.tabview.TabsObject())
+                new_tabview = self.tabview_func()
+                new_tabview.bind_gdtp(self.gdtp)
+                tabs_in_row = [*tabs_in_row, 
+                               pn.Spacer(width=40, styles={'background':'snow'}), 
+                               new_tabview]
+            tabs_in_row.append(pn.Spacer(width=20))
             return pn.Row(
                 *tabs_in_row,
                 sizing_mode='stretch_height'

@@ -29,6 +29,8 @@ class Tab:
         self.dtp = pn.widgets.DatetimeRangePicker(name=f'{name} datetime picker')
         self.dld = dld
         self.required_DL = required_DL
+        self.plottables = plottables
+
         self._bind_data()
 
         if longname is None: longname = name
@@ -43,25 +45,29 @@ class Tab:
         self.scroll_bkg = 'snow'
 
         # calling the plottable objects ensures that the tab-bound data is now also bound to the plottable object
-        self.plottables = plottables
         [p(self.data) for p in self.plottables]
+        print(f'Tab {self.name}.__init__(): {self.plottables=}')
 
-        pn.bind(self.print_boo, self.dtp)
+    
+    def _data_column(self, dtr):
+        data_column_objs = []
+        for p in self.plottables:
+            p(self.data)
+            data_column_objs.append(p)
+            data_column_objs.append(pn.VSpacer(height=20, styles={'background':self.scroll_bkg}))
+        data_column = pn.Row(
+            pn.Spacer(width=40, styles={'background':self.scroll_bkg}),
+            pn.Column(*data_column_objs, sizing_mode='stretch_width'),
+            pn.Spacer(width=40, styles={'background':self.scroll_bkg}),
+            #scroll=True
+        )
+        return data_column
 
 
     def __panel__(self):
         '''Function that returns the panel-viewable object that is the tab content. This will be the top row containing the tab title, the datetime picker for the tab; and the scrollable column containing the actual plots. This will have a spacer on the left and right to allow for scrolling of the plots easily.'''
-        print(f'Tab {self.name}.__panel__(): {self.plottables=}')
-        data_column_objs = [obj for tup in [(p ,pn.VSpacer(height=20, styles={'background':self.scroll_bkg})) for p in self.plottables]
-                            for obj in tup]
-        plot_row = pn.Row(
-            pn.Spacer(width=40, styles={'background':self.scroll_bkg}),
-            pn.Column(*data_column_objs, sizing_mode='stretch_width'),
-            pn.Spacer(width=40, styles={'background':self.scroll_bkg}),
-            scroll=True
-        )
-
-        return pn.Column(self.top_row, plot_row)
+        dc = pn.bind(self._data_column, self.dtp)
+        return pn.Column(self.top_row, dc)
     
 
     def bind_gdtp(self, gdtp: pn.widgets.DatetimeRangePicker):
@@ -89,9 +95,7 @@ class Tab:
             inst: pn.bind(self.dld[inst], self.dtp)
             for inst in self.required_DL
         }
-
-    def print_boo(self, dtr):
-        print(dtr)
+        [p(self.data) for p in self.plottables]
 
 
 

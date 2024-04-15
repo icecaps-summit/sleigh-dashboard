@@ -3,6 +3,8 @@ Creation Date: 15/4/24
 
 Script to demonstrate the new OOP implementation of the dashboard.
 '''
+import warnings
+warnings.filterwarnings('once')
 
 
 import panel as pn
@@ -16,10 +18,21 @@ import dashboard.Tab
 import dashboard.TabView
 
 # DataLoader objects need to be defined to control the dataflow in the program
-DL_lidar = dashboard.DataLoader.DataLoader('cl61', '/data/cl61/daily', 'summary_cl61_%Y%m%d.nc')
-DL_radar = dashboard.DataLoader.DataLoader('mrr','/data/mrr', 'summary_mrr_%Y%m%d.nc')
+DL_cl61 = dashboard.DataLoader.DataLoader('cl61', '/data/cl61/daily', 'summary_cl61_%Y%m%d.nc')
+DL_mrr = dashboard.DataLoader.DataLoader('mrr','/data/mrr', 'summary_mrr_%Y%m%d.nc')
+#DL_asfs
+DL_gpr5 = dashboard.DataLoader.DataLoader('gpr5', '/data/gpr', 'summary_gpr_5_%Y%m%d.nc')
+DL_gpr7 = dashboard.DataLoader.DataLoader('gpr7', '/data/gpr', 'summary_gpr_7_%Y%m%d.nc')
+#DL_mvp
+DL_simba = dashboard.DataLoader.DataLoader('simba', '/data/simba', 'summary_simba_%Y%m%d.nc')
 
-dld = {'cl61': DL_lidar, 'mrr': DL_radar}
+dld = {
+    'cl61': DL_cl61, 
+    'mrr': DL_mrr,
+    'gpr5':DL_gpr5,
+    'gpr7':DL_gpr7,
+    'simba':DL_simba
+}
 
 
 # we need to define the datetime picker that the Dashboard utilitses
@@ -31,21 +44,16 @@ dtp_args = {'value':dtr, 'start':start, 'end':end, 'name':'global dtp picker'}
 ### LIDAR
 #### PLOTTABLES
 # starting simple, backscatter
-lidar_plot_backscatter = dashboard.Plottables.Plot_2D(
-    datasource='cl61', variable='beta_att_mean',
-    plotargs={
-        'x':'time', 'y':'range', 'ylabel': 'Height AGL (m)', 'xlabel':'time', 'ylim':(0,5000), 'title': 'mean attenuated backscatter'
-    }, 
-    cnorm='log', 
-    clim=(1e-8, 1e-2)
-)
-lidar_plot_lindepol = dashboard.Plottables.Plot_2D(
-    datasource='cl61', variable='linear_depol_ratio_median',
-    plotargs={
-        'x':'time', 'y':'range', 'ylabel':'Height AGL (m)', 'xlabel':'time', 'ylim':(0,5000), 'title':'Linear depolarisation ratio'
-    },
-    clim=(0,1)
-)
+class lidarplot(dashboard.Plottables.Plot_2D):
+    def __init__(self, variable, title, clim, cmap='viridis', cnorm='linear'):
+        pargs={
+            'x':'time', 'y':'range', 'ylabel':'Height AGL (m)', 'xlabel':'time', 'ylim':(0,5000)
+        }
+        super().__init__('cl61', variable, pargs, cmap=cmap, cnorm=cnorm, clim=clim)
+        self.plotargs['title']=title
+
+lidar_plot_backscatter = lidarplot('beta_att_mean', 'mean attenuated backscatter', (1e-8,1e-2), cnorm='log')
+lidar_plot_lindepol = lidarplot('linear_depol_ratio_median', 'median linear depolarisation ratio', (0,1))
 
 lidar_tab = dashboard.Tab.Tab(
     name='lidar', 
@@ -79,7 +87,7 @@ radar_tab = dashboard.Tab.Tab(
 
 # I should be able to serve the individual tabs as panel-servable objects
 
-tabview = dashboard.TabView.TabView([lidar_tab, radar_tab])
+tabview = lambda: dashboard.TabView.TabView([lidar_tab, radar_tab])
 
 
 db = dashboard.Dashboard.Dashboard(dtp_args, dld, tabview)

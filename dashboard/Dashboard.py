@@ -60,8 +60,10 @@ class Dashboard:
         def main_content(compare):
             tabs_in_row = [pn.Spacer(width=20),self.tabview]
             if compare:
+                current_active = tabs_in_row.active
                 new_tabview = self.tabview_func()
                 new_tabview.bind_gdtp(self.gdtp)
+                new_tabview.active = current_active
                 tabs_in_row = [*tabs_in_row, 
                                pn.Spacer(width=40, styles={'background':'snow'}), 
                                new_tabview]

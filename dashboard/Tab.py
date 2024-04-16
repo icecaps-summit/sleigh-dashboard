@@ -9,6 +9,11 @@ Each tab also has its own instrument-specific datetime range picker that can be 
 import panel as pn
 from .DataLoader import DataLoader
 from .Plottables import BasePlottable
+import xarray as xr
+
+import datetime as dt
+
+_default_dtr = (dt.datetime.now()-dt.timedelta(days=1), dt.datetime.now())
 
 class Tab:
     '''The Tab class provides all of the functionality of an individual viewable tab in the Dashboard.
@@ -26,12 +31,12 @@ class Tab:
         self.name = name
         
         # upon initialisation, the DatetimeRangePicker assumes default values (allows standalone use). When used within a Dashboard, self.bind_gdtp can be used to bind a global datetime range picker.
-        self.dtp = pn.widgets.DatetimeRangePicker(name=f'{name} datetime picker')
+        self.dtp = pn.widgets.DatetimeRangePicker(name=f'{name} datetime picker', value=_default_dtr)
         self.dld = dld
         self.required_DL = required_DL
         self.plottables = plottables
 
-        self._bind_data()
+        self.data = pn.bind(self._bind_data, self.dtp)
 
         if longname is None: longname = name
         self.top_row = pn.Row(
@@ -45,11 +50,12 @@ class Tab:
         self.scroll_bkg = 'snow'
 
         # calling the plottable objects ensures that the tab-bound data is now also bound to the plottable object
-        [p(self.data) for p in self.plottables]
+        [pn.bind(p,self.data) for p in self.plottables]
         print(f'Tab {self.name}.__init__(): {self.plottables=}')
 
     
     def _data_column(self, dtr):
+        print(f'Tab {self.name}._data_column running')
         data_column_objs = []
         for p in self.plottables:
             p(self.data)
@@ -71,7 +77,6 @@ class Tab:
     
 
     def bind_gdtp(self, gdtp: pn.widgets.DatetimeRangePicker):
-        self.gdtp = gdtp
         self.dtp.start = gdtp.start
         self.dtp.end = gdtp.end
         self.dtp.value = gdtp.value
@@ -84,18 +89,17 @@ class Tab:
         '''
         # binds the Tab objects datetime picker to the global one. Changes in the global dtp reflect in the local one.
         #self.dtp.value = self.gdtp.value
-        self._bind_data()
         return
     
 
-    def _bind_data(self):
+    def _bind_data(self, dtr) -> dict[str:xr.Dataset]:
         print(f'Tab. {self.name}_bind_data()')
         # data needs rebinding each time that the dtp is updated
-        self.data = {
-            inst: pn.bind(self.dld[inst], self.dtp)
+        data = {
+            inst: self.dld[inst](dtr)
             for inst in self.required_DL
         }
-        [p(self.data) for p in self.plottables]
+        return data
 
 
 

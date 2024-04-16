@@ -23,14 +23,14 @@ class TabView:
         self.tablist = tablist
             
 
-    def TabsObject(self) -> pn.Tabs:
+    def __call__(self) -> pn.Tabs:
         return pn.Tabs(
             *[(t.name, t) for t in self.tablist],
             sizing_mode='stretch_both', dynamic=True
         )
 
     def __panel__(self):
-        return self.TabsObject()
+        return self.__call__()
     
 
     def bind_gdtp(self, gdtp):

@@ -128,6 +128,37 @@ def test_radar_tab():
     )
     pn.serve(radar_tab, title='test radar tab', port=5006, websocket_origin='*', show=True)
 
+def create_new_TabView():
+    DL_cl61 = dashboard.DataLoader.DataLoader('cl61', '/data/cl61/daily', 'summary_cl61_%Y%m%d.nc')
+    lidar_plot_backscatter = lidarplot('beta_att_mean', 'mean attenuated backscatter', (1e-8,1e-2), cnorm='log')
+    lidar_plot_lindepol = lidarplot('linear_depol_ratio_median', 'median linear depolarisation ratio', (0,1))
+    lidar_tab = dashboard.Tab.Tab(
+        name='lidar', 
+        plottables=[lidar_plot_backscatter, lidar_plot_lindepol],
+        dld = {'cl61':DL_cl61}, # TODO:THIS NEEDS FIXING
+        required_DL=['cl61'],
+        longname='Vaisalla CL61 Ceilometer'
+    )
+    DL_mrr = DL_mrr = dashboard.DataLoader.DataLoader('mrr','/data/mrr', 'summary_mrr_%Y%m%d.nc')
+    radar_plot_Z = radarplot('Z_median', 'Z median (dBZ)', clim=(-10, 30))
+    radar_plot_VEL = radarplot('VEL_median', 'Doppler VEL median (m/s)', clim=(-10,10))
+    radar_plot_WIDTH = radarplot('WIDTH_median', 'Dopper WIDTH median (m/s)', clim=(5e-3, 5), cnorm='log')
+    radar_tab = dashboard.Tab.Tab(
+        name='mRr',
+        plottables=[radar_plot_Z, radar_plot_VEL, radar_plot_WIDTH],
+        dld={'mrr': DL_mrr}, # TODO: fix this...
+        required_DL=['mrr'],
+        longname='Micro Rain Radar (MRR)'
+    )
+    tabview = dashboard.TabView.TabView([lidar_tab, radar_tab])
+    return tabview
+
+def test_TabView():
+    tbv = create_new_TabView()
+    pn.serve(tbv, title='TabView test', port=5006, websocket_origin='*', show=True)
+
+
 
 #test_lidar_tab()
-test_radar_tab()
+#test_radar_tab()
+test_TabView()

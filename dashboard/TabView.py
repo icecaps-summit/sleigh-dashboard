@@ -5,6 +5,7 @@ Script containing the TabView class, that will define the object conatining the 
 '''
 
 from .Tab import Tab
+from .DataLoader import DataLoader
 import panel as pn
 
 class TabView:
@@ -18,9 +19,13 @@ class TabView:
     '''
 
     def __init__(self, 
-        tablist: list[Tab]
+        tablist: list[Tab],
+        dld: dict[str: DataLoader]
     ):
         self.tablist = tablist
+        self.dld = dld
+        for tab in tablist:
+            tab.dld = self.dld
             
 
     def __call__(self) -> pn.Tabs:

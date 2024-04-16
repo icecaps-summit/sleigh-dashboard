@@ -24,7 +24,7 @@ class Tab:
     def __init__(self,
         name: str,
         plottables: list[BasePlottable],
-        dld: dict[str: DataLoader],
+        dld: dict[str: DataLoader] | None,
         required_DL: list[str],
         longname: str | None = None,
     ):
@@ -95,11 +95,13 @@ class Tab:
     def _bind_data(self, dtr) -> dict[str:xr.Dataset]:
         print(f'Tab. {self.name}_bind_data()')
         # data needs rebinding each time that the dtp is updated
-        data = {
-            inst: self.dld[inst](dtr)
-            for inst in self.required_DL
-        }
-        return data
+        if self.dld is not None:
+            data = {
+                inst: self.dld[inst](dtr)
+                for inst in self.required_DL
+            }
+            return data
+        else: return None
 
 
 

@@ -6,6 +6,7 @@ Script containing the class for the BasePlottable, and the inheriting Plottable 
 import xarray as xr
 import holoviews as hv
 import hvplot.xarray
+import panel as pn
 
 
 class BasePlottable:
@@ -16,14 +17,25 @@ class BasePlottable:
         self.variable = variable
         self.plotargs = plotargs
         self.plotargs['responsive'] = True
+        self.dd = None
 
     def __panel__(self):
-        raise NotImplemented('Please use a class inheriting from BasePlottable for rendering in panel')
+        panelob = pn.bind(self.plot, self.dd)
+        if type(panelob) is AttributeError:
+            panelob = pn.pane.Markdown(f'## Attribute error, {panelob}')
+        elif type(panelob) is TypeError:
+            panelob = pn.pane.Markdown(f'## Type Error: {panelob}')
+        elif type(panelob) is Exception:
+            panelob = pn.pane.Markdown(f'## general exception, {panelob}')
+        return panelob
     
     def __call__(self, dd: dict[str: xr.Dataset]):
         '''NOTE: dd should be a dict containing panel-bound xarray Datasets, to ensure automatic updating.'''
         self.dd = dd
 
+    def plot(self):
+        '''Function that needs to be called to return the panel object, is bound in __panel__'''
+        raise NotImplementedError('Please use a class ingeriting from BasePlottable for rendering in panel')
 
 
 class Plot_2D(BasePlottable):
@@ -37,10 +49,13 @@ class Plot_2D(BasePlottable):
         self.plotargs['cnorm']=cnorm
         self.plotargs['clim']=clim
 
-    def __panel__(self):
-        return self.dd[self.datasource]()[self.variable].hvplot(
-            **self.plotargs
-        )
+    def plot(self, dd):
+        try:
+            return dd[self.datasource][self.variable].hvplot(
+                **self.plotargs
+            )
+        except Exception as e:
+            return e
     
 
 class Plot_scatter(BasePlottable):
@@ -52,8 +67,11 @@ class Plot_scatter(BasePlottable):
         self.plotargs['height'] = height
         self.plotargs['s'] = 5
 
-    def __panel__(self):
-        return self.dd[self.datasource].hvplot.scatter(
-            **self.plotargs
-        )
+    def plot(self, dd):
+        try:
+            return dd[self.datasource].hvplot.scatter(
+                **self.plotargs
+            )
+        except Exception as e:
+            return e
     

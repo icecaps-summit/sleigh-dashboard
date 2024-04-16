@@ -181,7 +181,6 @@ def test_Dashboard():
     pn. serve(db, title='Dashboard test', port=5006, websocket_origin='*', show=True)
 
 
-
 #test_lidar_tab()
 #test_radar_tab()
 #test_TabView()

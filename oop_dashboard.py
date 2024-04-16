@@ -157,11 +157,11 @@ def oop_dashboard(dtp_args,dld):
     return db
 
 
-#pn.serve(oop_dashboard(dtp_args,dld),title='OOP Dashboard', port=5006, websocket_origin='*', show=True )
+pn.serve(oop_dashboard(dtp_args,dld),title='OOP Dashboard', port=5006, websocket_origin='*', show=True )
 
-
-tab = get_radar_tab()
-tab.dld = dld
-pn.serve(tab, port=5006, websocket_origin='*', show=True)
+# Framework for testing a singular desired tab
+#tab = get_radar_tab()
+#tab.dld = dld
+#pn.serve(tab, port=5006, websocket_origin='*', show=True)
 
 

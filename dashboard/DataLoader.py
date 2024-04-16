@@ -62,9 +62,11 @@ class DataLoader:
     def __call__(self, dtr: tuple[dt.datetime, dt.datetime]) -> xr.Dataset:
         '''When called, the DataLoader updates its data based on the given datetime range and returns the appropriately sliced data'''
         self.update_data(dtr)
-        tslice = slice(*dtr, None)
-        selarg = {self.sortby_dim: tslice}
-        return self.data.sel(**selarg)
+        if self.data is not None:
+            tslice = slice(*dtr, None)
+            selarg = {self.sortby_dim: tslice}
+            return self.data.sel(**selarg)
+        return None
 
     def update_data(self,
         dtr: tuple[dt.datetime, dt.datetime]

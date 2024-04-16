@@ -25,21 +25,24 @@ class Dashboard:
     def __init__(self, 
         dtp_args: dict,
         dict_DL: dict[str: DataLoader],
-        tabview: callable
+        tabview_func: callable
     ):
         '''Initialisation function
         
         INPUTS:
             dtp_args: dict
                 dictionary of all arguments provided to create the datetime range picker. These are the start, end, value and name parameters
+
+            tabview_func : callable -> TabView
+                a callable function that takes the input of a (dld = dict[str: DataLoader], augment:bool) and returns a TabView object, a collection of pre-determined tabs
         '''
         dtp_args['enable_seconds'] = False
         self.gdtp = pn.widgets.DatetimeRangePicker(**dtp_args)
         self.compare = pn.widgets.Switch(name='Compare', value=False)
 
         self.dld = dict_DL
-        self.tabview_func = tabview
-        self.tabview = tabview()
+        self.tabview_func = tabview_func
+        self.tabview = tabview_func(self.dld, False)
 
         self.tabview.bind_gdtp(self.gdtp)
 
@@ -60,7 +63,7 @@ class Dashboard:
         def main_content(compare):
             tabs_in_row = [left_spacer,self.tabview]
             if compare:
-                new_tabview = self.tabview_func()
+                new_tabview = self.tabview_func(self.dld, True)
                 new_tabview.bind_gdtp(self.gdtp)
                 tabs_in_row = [*tabs_in_row, 
                                pn.Spacer(width=40, styles={'background':'snow'}), 

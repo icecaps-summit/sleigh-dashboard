@@ -27,6 +27,7 @@ class Tab:
         dld: dict[str: DataLoader] | None,
         required_DL: list[str],
         longname: str | None = None,
+        augment_dims = False # used to rename data dims in event that Tab is a comparison tab...
     ):
         self.name = name
         
@@ -35,6 +36,7 @@ class Tab:
         self.dld = dld
         self.required_DL = required_DL
         self.plottables = plottables
+        self.augment_dims = augment_dims
 
         self.data = pn.bind(self._bind_data, self.dtp)
 
@@ -75,11 +77,17 @@ class Tab:
         dc = pn.bind(self._data_column, self.dtp)
         return pn.Column(self.top_row, dc)
     
+    def _bind_gdtp_val(self, gdtr):
+        print(f'#### Tab {self.name}._bind_gdtp_val: {gdtr=}')
+        self.dtp.value = gdtr
 
     def bind_gdtp(self, gdtp: pn.widgets.DatetimeRangePicker):
-        self.dtp.start = gdtp.start
-        self.dtp.end = gdtp.end
-        self.dtp.value = gdtp.value
+        self.gdtp = gdtp
+        self.dtp.value = self.gdtp
+        self.dtp.start = self.gdtp.start
+        self.dtp.end = self.gdtp.end
+        #pn.bind(self._bind_gdtp_val, self.gdtp)
+        print(f'#### Tab {self.name}.bind_gdtp complete')
         '''
         self.dtp = pn.widgets.DatetimeRangePicker(
             name=f'{self.name} datetime picker', value=gdtp.value,
@@ -93,11 +101,11 @@ class Tab:
     
 
     def _bind_data(self, dtr) -> dict[str:xr.Dataset]:
-        print(f'Tab. {self.name}_bind_data()')
+        print(f'Tab. {self.name}_bind_data({self.augment_dims=})')
         # data needs rebinding each time that the dtp is updated
         if self.dld is not None:
             data = {
-                inst: self.dld[inst](dtr)
+                inst: self.dld[inst](dtr, self.augment_dims)
                 for inst in self.required_DL
             }
             return data

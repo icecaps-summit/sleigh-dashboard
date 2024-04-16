@@ -59,13 +59,27 @@ class DataLoader:
         if init_dtr is not None:
             self.update_data(init_dtr)
 
-    def __call__(self, dtr: tuple[dt.datetime, dt.datetime]) -> xr.Dataset:
-        '''When called, the DataLoader updates its data based on the given datetime range and returns the appropriately sliced data'''
+    def __call__(self, 
+        dtr: tuple[dt.datetime, dt.datetime],
+        augment=False    
+    ) -> xr.Dataset:
+        '''When called, the DataLoader updates its data based on the given datetime range and returns the appropriately sliced data.
+        
+        dtr: tuple[dt.datetime, dt.datetime]
+            tuple containing the start and end datetime objects of the range of data to be served.
+
+        augment: bool
+            If true, change all of the dimension, coordinate and variables names to contain a trailing underscore, so that shared_axes is broken between augmented and non-augmented plots on the Dashboard.
+        '''
         self.update_data(dtr)
         if self.data is not None:
             tslice = slice(*dtr, None)
             selarg = {self.sortby_dim: tslice}
-            return self.data.sel(**selarg)
+            ds = self.data.sel(**selarg)
+            if augment: 
+                ds = ds.rename_dims({k:k+'_' for k in ds.dims})
+                ds = ds.rename_vars({k:k+'_' for k in ds.coords})
+            return ds
         return None
 
     def update_data(self,

@@ -81,9 +81,31 @@ class gprplot_scatter(dashboard.Plottables.Plot_scatter):
         self.plotargs['title'] = title
 
 
+class simbaplot_2d(dashboard.Plottables.Plot_2D):
+    def __init__(self, variable, title, clim=(None, None), cmap='viridis', cnorm='linear', augment=False):
+        pargs = {
+            'x':'time', 'y':'height', 'xlabel':'time', 'ylabel':'Height AGL (cm)'
+        }
+        if augment: pargs.update({'x':'time_', 'y':'height_'})
+        super().__init__('simba',variable, pargs, cmap=cmap, cnorm=cnorm, clim=clim)
+        self.plotargs['title'] = title
+
+
+class simbaplot_scatter(dashboard.Plottables.Plot_scatter):
+    def __init__(self, variable, title, augment=False):
+        pargs = {
+            'x': 'time', 'xlabel': 'time'
+        }
+        if augment: pargs.update({'x':'time_'})
+        super().__init__('simba',variable, pargs)
+        self.plotargs['title'] = title
+
+
+
+
 def get_lidar_tab(augment=False):
     plot_backscatter = lidarplot('beta_att_mean', 'mean attenuated backscatter', (1e-8,1e-2), cnorm='log', augment=augment)
-    plot_lindepol = lidarplot('linear_depol_ratio_median', 'median linear depolarisation ratio', (0,1), augment=augment)
+    plot_lindepol = lidarplot('linear_depol_ratio_median', 'median linear depolarisation ratio', (0,1), cmap='greys', augment=augment)
     lidar_tab = dashboard.Tab.Tab(
         name='CL61', 
         plottables=[plot_backscatter, plot_lindepol],
@@ -97,8 +119,8 @@ def get_lidar_tab(augment=False):
 
 def get_radar_tab(augment=False):
     plot_Z = radarplot('Z_median', 'Z median (dBZ)', clim=(-10, 30), augment=augment)
-    plot_VEL = radarplot('VEL_median', 'Doppler VEL median (m/s)', clim=(-10,10), augment=augment)
-    plot_WIDTH = radarplot('WIDTH_median', 'Dopper WIDTH median (m/s)', clim=(5e-3, 5), cnorm='log', augment=augment)
+    plot_VEL = radarplot('VEL_median', 'Doppler VEL median (m/s)', clim=(-10,10), augment=augment, cmap='RdBu')
+    plot_WIDTH = radarplot('WIDTH_median', 'Dopper WIDTH median (m/s)', clim=(5e-3, 5), cnorm='log', augment=augment, cmap='magma')
     radar_tab = dashboard.Tab.Tab(
         name='MRR',
         plottables=[plot_Z, plot_VEL, plot_WIDTH],
@@ -135,12 +157,36 @@ def get_gpr_tab(augment=False):
     return gpr_tab
 
 
+def get_simba_tab(augment=False):
+    p_T = simbaplot_2d('temperature', 'Temperature (°C)', augment=augment, clim=(-35,5))
+    p_samplespan = simbaplot_scatter('sample_span', 'Sample span', augment=augment)
+    p_batt = simbaplot_scatter('battery_voltage', 'Battery Voltage (V)', augment=augment)
+    p_startstop = simbaplot_scatter(['sample_start','sample_end'], 'Sample time', augment=augment)
+    p_numsamp = simbaplot_scatter('sample_number', 'Sample number', augment=augment)
+    p_num_seq = simbaplot_scatter('sequence_number', 'Sequence number', augment=augment)
+
+    simba_tab = dashboard.Tab.Tab(
+        name='Simba',
+        plottables=[
+            p_T, p_samplespan, p_batt, 
+            p_startstop,
+            p_numsamp, p_num_seq
+        ],
+        dld=None,
+        required_DL=['simba'],
+        longname='Simba thermistor string',
+        augment_dims=augment
+    )
+    return simba_tab
+
+
 def get_tabview(dld, augment) -> dashboard.TabView.TabView:
     tabview = dashboard.TabView.TabView(
         tablist=[
             get_lidar_tab(augment),
             get_radar_tab(augment),
-            get_gpr_tab(augment)
+            get_gpr_tab(augment),
+            get_simba_tab(augment)
         ],
         dld=dld,
         augment_dims=augment
@@ -156,11 +202,13 @@ def oop_dashboard(dtp_args,dld):
     )
     return db
 
+serve_dashboard = lambda: oop_dashboard(dtp_args, dld)
 
-pn.serve(oop_dashboard(dtp_args,dld),title='OOP Dashboard', port=5006, websocket_origin='*', show=True )
+
+pn.serve(serve_dashboard,title='OOP Dashboard', port=5006, websocket_origin='*', show=True )
 
 # Framework for testing a singular desired tab
-#tab = get_radar_tab()
+#tab = get_simba_tab()
 #tab.dld = dld
 #pn.serve(tab, port=5006, websocket_origin='*', show=True)
 

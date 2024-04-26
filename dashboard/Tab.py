@@ -27,7 +27,7 @@ class Tab:
         dld: dict[str: DataLoader] | None,
         required_DL: list[str],
         longname: str | None = None,
-        augment_dims = False # used to rename data dims in event that Tab is a comparison tab...
+        augment_dims: bool = False # used to rename data dims in event that Tab is a comparison tab...
     ):
         self.name = name
         

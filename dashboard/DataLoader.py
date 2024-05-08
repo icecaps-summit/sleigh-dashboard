@@ -30,7 +30,9 @@ class DataLoader:
         dir: str,
         fname_fmt: str,
         init_dtr: tuple[dt.datetime, dt.datetime] | None = None,
-        sortby_dim: str = 'time'
+        sortby_dim: str = 'time',
+        concat_dim: str | None = None,
+        file_preproc: callable = (lambda x: x)
     ):
         '''Initilisation function. Requires a dataloader name, directory and filename format.
         
@@ -49,6 +51,12 @@ class DataLoader:
 
             sortby_dim: str
                 string describing the dimesnion along which the dataset should be sorted when new data is loaded.
+
+            concat_dim: str | None
+                string describing the dimension along which multiple datsets should be concatenated. If None, this will be the same as sortby_dim
+
+            file_preproc: callable[xr.Dataset] -> xr.Dataset
+                Function that accepts an xarray dataset, returns an xarray dataset, ad is applied to each file before they are combined along combine_dim. The default is to apply no preprocessing.
         '''
         self.name = name
         self.dir = dir
@@ -56,12 +64,19 @@ class DataLoader:
         self.data = None
         self.loaded_files = []
         self.sortby_dim = sortby_dim
+
+        if concat_dim is None:
+            concat_dim = sortby_dim
+        self.concat_dim = concat_dim    
+        
+        self.file_preproc = file_preproc
+
         if init_dtr is not None:
             self.update_data(init_dtr)
 
     def __call__(self, 
         dtr: tuple[dt.datetime, dt.datetime],
-        augment=False    
+        augment=False
     ) -> xr.Dataset:
         '''When called, the DataLoader updates its data based on the given datetime range and returns the appropriately sliced data.
         
@@ -76,6 +91,7 @@ class DataLoader:
             tslice = slice(*dtr, None)
             selarg = {self.sortby_dim: tslice}
             ds = self.data.sel(**selarg)
+
             if augment: 
                 ds = ds.rename_dims({k:k+'_' for k in ds.dims})
                 ds = ds.rename_vars({k:k+'_' for k in ds.coords})
@@ -101,10 +117,14 @@ class DataLoader:
         if self.data is not None: ds_to_merge = [self.data]
 
         for f in sorted(flist_to_load):
-            ds_to_merge.append( xr.load_dataset(os.path.join( self.dir, f )) )
+            ds_to_merge.append( 
+                self.file_preproc(
+                    xr.load_dataset(os.path.join( self.dir, f ))
+                ) 
+            )
             self.loaded_files.append(f)
 
-        self.data = xr.concat(ds_to_merge, dim=self.sortby_dim).sortby(self.sortby_dim)
+        self.data = xr.concat(ds_to_merge, dim=self.concat_dim).sortby(self.sortby_dim)
         return
 
     def _get_files_from_dtr(self,

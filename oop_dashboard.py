@@ -13,6 +13,7 @@ import datetime as dt
 import hvplot.xarray
 import holoviews as hv
 import xarray as xr
+import numpy as np
 
 import traceback
 
@@ -43,7 +44,7 @@ dld = {
 
 # global datetime picker arguments
 start = dt.datetime(2024,3,10)
-end = dt.datetime(2024,3,25) # deliberately including days at the end where data doesn't exist, DataLoader should be impervious to these problems...
+end = None#dt.datetime(2024,3,25) # deliberately including days at the end where data doesn't exist, DataLoader should be impervious to these problems...
 dtr = (dt.datetime(2024,3,14), dt.datetime(2024,3,16)) # should start by displaying two days of data
 dtp_args = {'value':dtr, 'start':start, 'end':end, 'name':'global dtp picker'}
 
@@ -367,15 +368,86 @@ def get_mvp_tab(augment=False):
 
 
 
+##################################################
+#GFS weather
+
+def preproc_GFS(gfs):
+    gfs = gfs.expand_dims({'init_time':[gfs.time.values[0]]})
+    gfs = gfs.rename_dims({'time': 'time_index'})
+    gfs['time'] = xr.DataArray(
+        data = [gfs.time.values], dims=['init_time','time_index']
+    )
+    gfs['recency'] = (gfs.time - gfs.init_time)
+    gfs['recency_alpha'] = 1 - 0.9 * gfs['recency'] / np.max(gfs['recency'])
+    return gfs
+
+class DataLoader_GFS(dashboard.DataLoader.DataLoader):
+    def _get_files_from_dtr(self, dtr: tuple[dt.datetime, dt.datetime]) -> list[str]:
+        flist = super()._get_files_from_dtr(dtr)
+        flist_00 = [f.replace('*', '00') for f in flist]
+        flist_06 = [f.replace('*', '06') for f in flist]
+
+        flist_list = [ [f.replace('*',tstr) for f in flist] for tstr in ['00','06','12','18']]
+        return [v for fl in flist_list for v in fl]
+
+
+DL_gfs = DataLoader_GFS('gfs', '/data/weather/GFS', 'Raven_GFS_Global_0p5deg_%Y%m%d_*00.nc', sortby_dim='init_time', concat_dim = 'init_time', file_preproc=preproc_GFS)
+
+dld['gfs'] = DL_gfs
+
+class gfs_recency_alpha_plot(dashboard.Plottables.Plot_scatter):
+    def __init__(self, variable, title, augment=False):
+        pargs = {
+            'x': 'time', 'xlabel': 'time'
+        }
+        if augment: pargs.update({'x': 'time_'})
+        super().__init__('gfs', variable, pargs)
+        self.plotargs['title']=title
+        self.plotargs['s'] = 20
+        self.plotfuncs=[self.plot]
+        self.by = 'init_time'
+        if augment: self.by += '_'
+
+    def plot(self, dd):
+        try:
+            dd = self.postproc(dd)
+            return dd['gfs'].hvplot.scatter(y=self.variable, alpha='recency_alpha', **self.plotargs, by=self.by)
+        except Exception as e:
+            return e
+
+def get_gfs_tab(augment=False):
+    #p_Ts = dashboard.Plottables.Plot_scatter(
+    #   'gfs', 'Ts', 
+    #    {'x':'time', 'by':'init_time', #'alpha':'recency_alpha'}
+    #)
+    p_Ts = gfs_recency_alpha_plot('Ts', 'Surface Temperature', augment=augment)
+    p_Ps = gfs_recency_alpha_plot('Ps', 'Surface Pressure', augment=augment)
+    p_ws = gfs_recency_alpha_plot('ws', 'Wind Speed', augment=augment)
+    p_wd = gfs_recency_alpha_plot('wd', 'Wind direction', augment=augment)
+    p_pr = gfs_recency_alpha_plot('pr', 'Precipitation', augment=augment)
+
+    gfs_tab = dashboard.Tab.Tab(
+        'GFS', [p_Ts, p_Ps, p_ws, p_wd, p_pr], dld, ['gfs'], 'GFS weather', augment_dims=augment
+    )
+    return gfs_tab
+
+
+
+
+####################################################
+# Dashboard
+
+
 
 def get_tabview(dld, augment) -> dashboard.TabView.TabView:
     tabview = dashboard.TabView.TabView(
         tablist=[
-            get_mvp_tab(augment),
+            #get_mvp_tab(augment),
             get_lidar_tab(augment),
             get_radar_tab(augment),
             get_gpr_tab(augment),
-            get_simba_tab(augment)
+            get_simba_tab(augment),
+            get_gfs_tab(augment),
         ],
         dld=dld,
         augment_dims=augment
@@ -394,11 +466,11 @@ def oop_dashboard(dtp_args,dld):
 serve_dashboard = lambda: oop_dashboard(dtp_args, dld)
 
 
-#pn.serve(serve_dashboard,title='OOP Dashboard', port=5006, websocket_origin='*', show=True )
+pn.serve(serve_dashboard,title='OOP Dashboard', port=5006, websocket_origin='*', show=True )
 
 # Framework for testing a singular desired tab
-tab = get_mvp_tab()
-tab.dld = dld
-pn.serve(tab, port=5006, websocket_origin='*', show=True)
+#tab = get_gfs_tab()
+#tab.dld = dld
+#pn.serve(tab, port=5006, websocket_origin='*', show=True)
 
 

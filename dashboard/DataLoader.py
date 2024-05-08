@@ -131,6 +131,7 @@ class DataLoader:
         dtr: tuple[dt.datetime, dt.datetime]
     ) -> list[str]:
         '''Returns a list of filenames using the fname_fmt that are utilised within dtr.'''
+        # TODO: implement hourly loading? for gfs... 
         start = dtr[0]
         end = dtr[1]
         dt0 = dt.datetime(year=start.year, month=start.month, day=start.day)

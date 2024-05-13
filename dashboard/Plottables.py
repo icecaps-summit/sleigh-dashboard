@@ -68,14 +68,18 @@ class BasePlottable:
 
         if hv_outputs:
             #TODO: fix the multi_y for multiplied plots, currently its fucked...
-            hvo = hv.Overlay(hv_outputs)
+            try:
+                hvo = hv.Overlay(hv_outputs)
+            except:
+                hvo = hv_outputs[0]
             ylim_set = False
-            for hvp in hvo:
-                print(hvp.opts.info())
-                if 'ylim' in hvp.opts.info():
-                    ylim_set = True
-                    break
+            #for hvp in hvo:
+                #print(hvp.opts.info())
+                #if 'ylim' in hvp.opts.info():
+                #    ylim_set = True
+            #    break
             if ylim_set: hvo.opts(multi_y=True)
+            print(hvo)
             return pn.Column(
                 hvo, *erroneous_outputs
             )
@@ -110,14 +114,16 @@ class Plot_2D(BasePlottable):
 
 class Plot_scatter(BasePlottable):
     '''Plottable class for the scatter plots.'''
-    def __init__(self, datasource, variable, plotargs, height=300, s=5, postproc=postproc_identity):
+    def __init__(self, datasource, variable, plotargs, height=300, s=5, marker='+', postproc=postproc_identity):
         
         super().__init__(datasource, variable, plotargs, postproc=postproc_identity)
         
         self.plotargs['height'] = height
         self.plotargs['s'] = 5
+        self.plotargs['marker'] = marker
         if 'label' not in plotargs:
             self.plotargs['label'] = f'{self.datasource}.{self.variable}'
+        self.plotargs['grid']=True
 
     def plot(self, dd):
         try:
@@ -127,4 +133,68 @@ class Plot_scatter(BasePlottable):
             )
         except Exception as e:
             return e
-    
+
+
+class Plot_line(BasePlottable):
+    '''Plottable class for line plots.'''
+    def __init__(self, datasource, variable, plotargs, height=300, lw=5, postproc=postproc_identity):
+        
+        super().__init__(datasource, variable, plotargs, postproc=postproc)
+        
+        self.plotargs['height'] = height
+        self.plotargs['line_width'] = lw
+        self.plotargs['grid']=True
+
+    def plot(self, dd):
+        try:
+            dd = self.postproc(dd)
+            return dd[self.datasource][self.variable].hvplot.line(
+                **self.plotargs
+            )
+        except Exception as e:
+            return e
+        
+
+class Plot_line_scatter(BasePlottable):
+    def __init__(
+        self, 
+        datasource: str, variable: str | list[str], 
+        plotargs: dict,
+        height=300,
+        lw=2,
+        s=50,
+        marker='+',
+        postproc: callable = postproc_identity
+    ):
+        super().__init__(datasource, variable, plotargs, postproc)
+        self.plotargs['height'] = height
+        self.lw = lw
+        self.s = s
+        self.marker = marker
+        self.plotargs['grid']=True
+
+    def plot(self, dd):
+        try:
+            dd = self.postproc(dd)
+            line = dd[self.datasource][self.variable].hvplot.line(**self.plotargs, line_width=self.lw)
+            points = dd[self.datasource][self.variable].hvplot.scatter(**self.plotargs, s=self.s, marker=self.marker)
+
+            return line*points
+        
+        except Exception as e:
+            return e
+        
+'''
+def plot_line_scatter(datasource, variable, plotargs, height=300, lw=5, s=5, marker='+', postproc=postproc_identity):
+    PL = Plot_line(datasource, variable, plotargs, height, lw, postproc)
+    PS = Plot_scatter(datasource, variable, plotargs, height, s, marker, postproc)
+    return PL*PS
+'''  
+
+class Plot_hline(BasePlottable):
+    def __init__(self, datasource: str, variable: str | list[str], plotargs: dict, y):
+        super().__init__(datasource, variable, plotargs)
+        self.y = y
+
+    def plot(self, dd):
+        return hv.HLine(self.y).opts(color='black', line_width=0.5)

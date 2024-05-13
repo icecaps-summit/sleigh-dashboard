@@ -45,7 +45,11 @@ dld = {
 # global datetime picker arguments
 start = dt.datetime(2024,3,10)
 end = None#dt.datetime(2024,3,25) # deliberately including days at the end where data doesn't exist, DataLoader should be impervious to these problems...
-dtr = (dt.datetime(2024,3,14), dt.datetime(2024,3,16)) # should start by displaying two days of data
+
+now = dt.datetime.now()
+dtr_end = dt.datetime(year=now.year, month=now.month, day=now.day)
+one_day = dt.timedelta(days=1)
+dtr = (dtr_end-one_day, dtr_end) # should start by displaying two days of data
 dtp_args = {'value':dtr, 'start':start, 'end':end, 'name':'global dtp picker'}
 
 
@@ -63,8 +67,10 @@ class lidarplot(dashboard.Plottables.Plot_2D):
 
 
 def get_lidar_tab(augment=False):
-    plot_backscatter = lidarplot('beta_att_mean', 'mean attenuated backscatter', (1e-8,1e-2), cnorm='log', augment=augment)
-    plot_lindepol = lidarplot('linear_depol_ratio_median', 'median linear depolarisation ratio', (0,1), cmap='greys', augment=augment)
+    plot_backscatter = lidarplot('beta_att_mean', 'mean attenuated backscatter', (1e-8,1e-4), cnorm='log', augment=augment)
+
+    plot_lindepol = lidarplot('linear_depol_ratio_median', 'median linear depolarisation ratio', (0,0.5), cmap='cividis', augment=augment)
+
     lidar_tab = dashboard.Tab.Tab(
         name='CL61', 
         plottables=[plot_backscatter, plot_lindepol],
@@ -196,14 +202,214 @@ def get_simba_tab(augment=False):
     )
     return simba_tab
 
+################################################### MWR
 
-################################################### MVP
+DL_mwr = dashboard.DataLoader.DataLoader('mwr', '/data/mwr', 'summary_mwr_%Y%m%d.nc')
 
-class mvpplot_scatter(dashboard.Plottables.Plot_scatter):
-    def __init__(self,variable, title, augment=False, postproc = None):
+dld['mwr']=DL_mwr
+
+class mwr_plot(dashboard.Plottables.Plot_scatter):
+    def __init__(self, variable, title, augment=False):
         pargs = {
             'x': 'time', 'xlabel': 'time'
         }
+        if augment: pargs.update({'x':'time_'})
+        super().__init__('mwr',variable, pargs)
+        self.plotargs['title'] = title
+
+
+def get_mwr_tab(augment=False):
+    p_TB_mean = mwr_plot('BRT_TBs_mean', 'Mean brightness temperature', augment)
+    p_TB_mean.plotargs['by']='number_frequencies'
+
+    p_alarm = mwr_plot('HKD_AlFl_sum', 'Alarm Flag (summed)', augment)
+
+    p_recT = mwr_plot('HKD_Rec1_T_mean','Receiver temperature', augment) * mwr_plot('HKD_Rec2_T_mean', 'Receiver temperature', augment)
+
+    mwr_tab = dashboard.Tab.Tab(
+        name='MWR',
+        plottables=[p_TB_mean, p_alarm,p_recT],
+        dld=None,
+        required_DL=['mwr'],
+        longname='HATPRO Microwave Radiometer',
+        augment_dims=augment
+    )
+    return mwr_tab
+
+
+################################################### ASFS
+
+
+DL_asfs_slow = dashboard.DataLoader.DataLoader('asfs', '/data/asfs','summary_asfs_slow_%Y%m%d.nc')
+
+dld['asfs'] = DL_asfs_slow
+
+class asfsplot(dashboard.Plottables.Plot_line_scatter):
+    def __init__(self, variable: str | list[str], plotargs: dict, title ,augment=False):
+        plotargs['x'] = 'time'
+        plotargs['xlabel'] = 'time'
+        if augment: plotargs['x'] = 'time_'
+        plotargs['title'] = title
+        super().__init__('asfs', variable, plotargs)
+
+
+def get_asfs_tab(augment=False):
+    p_rad = \
+        asfsplot('sr30_swu_IrrC_mean',{'label':'SWU', 'ylabel':'Power (W/m2)'},'RADIATION', augment=augment) * \
+        asfsplot('sr30_swd_IrrC_mean',{'label':'SWD'},'RADIATION', augment=augment) * \
+        asfsplot('ir20_lwu_Wm2_mean',{'label':'LWU'},'RADIATION', augment=augment) * \
+        asfsplot('ir20_lwd_Wm2_mean',{'label':'LWD'},'RADIATION', augment=augment)
+    
+    p_fp = \
+        asfsplot('fp_A_Wm2_mean', {'label':'A', 'ylabel':'Power (W/m2)'}, 'FLUX PLATES', augment=augment) * \
+        asfsplot('fp_B_Wm2_mean', {'label':'B'}, 'FLUX PLATES', augment=augment)
+    
+    p_fantach = \
+        asfsplot('sr30_swu_fantach_mean', {'label':'SWU', 'ylabel': 'tachometer (?)'},'FANTACH', augment=augment) * \
+        asfsplot('sr30_swd_fantach_mean', {'label':'SWD'},'FANTACH', augment=augment) * \
+        asfsplot('ir20_lwu_fan_mean', {'label':'LWU'}, 'FANTACH', augment=augment) * \
+        asfsplot('ir20_lwd_fan_mean', {'label':'LWD'}, 'FANTACH', augment=augment)
+    
+    p_rad_heat = \
+        asfsplot('sr30_swu_heatA_mean', {'label':'SWU', 'ylabel': 'Heater (?)'}, 'RAD HEATERS', augment=augment) * \
+        asfsplot('sr30_swd_heatA_mean', {'label':'SWD'}, 'RAD HEATERS', augment=augment)
+    
+    p_sr50 = asfsplot('sr50_dist_mean', {'ylabel': 'Height (?)'}, 'SR50 SNOW HEIGHT', augment=augment)
+
+    p_wind = \
+        asfsplot('wspd_u_mean', {'label':'u', 'ylabel':'speed (m/s)'}, 'SONIC ANEMOMETER', augment=augment) * \
+        asfsplot('wspd_v_mean', {'label':'v'}, 'SONIC ANEMOMETER', augment=augment) * \
+        asfsplot('wspd_w_mean', {'label':'w'}, 'SONIC ANEMOMETER', augment=augment) * \
+        asfsplot('wspd_vec_mean', {'label':'total'}, 'SONIC ANEMOMETER', augment=augment)
+    
+    p_wind_dir = asfsplot('wdir_vec_mean', {'ylabel':'wind direction (###deg from REF###)'}, 'WIND DIRECTION', augment=augment)
+
+    p_vaisala_T = asfsplot('vaisala_T_mean', {'ylabel': 'Temperature (C)'}, 'VAISALA TEMPERATURE', augment=augment)
+    p_vaisala_P = asfsplot('vaisala_P_mean', {'ylabel': 'Pressure (?)'}, 'VAISALA PRESSURE', augment=augment)
+    p_vaisala_RH = asfsplot('vaisala_RH_mean', {'ylabel': 'Relative humidity (%)'}, 'VAISALA RH', augment=augment)
+    
+    asfs_tab = dashboard.Tab.Tab(
+        'ASFS',
+        [p_rad, p_fp, p_sr50, p_wind, p_wind_dir, p_vaisala_T, p_vaisala_P, p_vaisala_RH, p_fantach, p_rad_heat],
+        dld=None,
+        required_DL=['asfs'],
+        longname='Atmospheric Surface Flux Station',
+        augment_dims=augment
+    )
+    return asfs_tab
+
+
+################################################### MVP
+
+def mvp_load_preproc(mvp):
+    tcoords = [('time', mvp.time.values)]
+    mvp['BatterySOC'] = xr.DataArray(mvp.BatterySOC.values, coords=tcoords, name='SOC [%]')
+    mvp['BatteryWatts'] = xr.DataArray(mvp.BatteryWatts.values, coords=tcoords, name='BattS [W]')
+
+    mvp['SolarWatts_Tot'] = xr.DataArray(
+        mvp.SolarWatts_East.values
+        + mvp.SolarWatts_South.values
+        + mvp.SolarWatts_West.values,
+        coords=tcoords, name='Total'
+    )
+
+    mvp['SolarWatts_E'] = xr.DataArray(mvp.SolarWatts_East.values  , coords=tcoords, name='East')
+    mvp['SolarWatts_W'] = xr.DataArray(mvp.SolarWatts_West.values  , coords=tcoords, name='West')
+    mvp['SolarWatts_S'] = xr.DataArray(mvp.SolarWatts_South.values , coords=tcoords, name='South')
+
+    mvp['WindWatts'] = xr.DataArray(mvp.WindWatts.values, coords=tcoords, name='Wind [W]')
+    mvp['ACOutputWatts'] = xr.DataArray(mvp.ACOutputWatts.values, coords=tcoords, name='AC [W]')
+    mvp['DCInverterWatts'] = xr.DataArray(mvp.DCInverterWatts.values, coords=tcoords, name='DCInverterWatts')
+
+    mvp['DCWatts'] = mvp.SolarWatts_Tot + mvp.WindWatts - mvp.BatteryWatts - mvp.DCInverterWatts
+    mvp.DCWatts.name = 'DC [W]'
+    return mvp
+
+DL_mvp = dashboard.DataLoader.DataLoader('mvp', '/data/power/level2', 'power.mvp.level2.1min.%Y%m%d.000000.nc', file_preproc=mvp_load_preproc)
+dld['mvp'] = DL_mvp
+
+class mvp_dials_plot(dashboard.Plottables.BasePlottable):
+    def __init__(self):
+        super().__init__('mvp', 'BatterySOC', {})
+        self.plotfuncs = [self.plot]
+
+    def plot(self, dd):
+        try:
+            alarm_color   = 'palevioletred'
+            warning_color = 'khaki'
+            happy_color   = 'mediumseagreen'
+
+            t_avg = '20Min'
+            batt_soc = np.round(dd['mvp'].BatterySOC.resample(time=t_avg).mean(skipna=True).values[-1],0)
+            batt_v = np.round(dd['mvp'].BatteryVolts.resample(time=t_avg).mean(skipna=True).values[-1], 0)
+            ac_watts = np.round(dd['mvp'].ACOutputWatts.resample(time=t_avg).mean(skipna=True).values[-2], 1)
+            dc_watts = np.round(dd['mvp'].DCWatts.resample(time=t_avg).mean(skipna=True).values[-1],0)
+
+            G1 = pn.indicators.Gauge(
+                name=f'SOC\n\n{batt_soc}%',
+                value=batt_soc, bounds=(0,100), 
+                colors=[(0.2,alarm_color), (0.5, warning_color), (1, happy_color)],
+                title_size=15,height=220, num_splits=5,
+                custom_opts={"detail": {"fontSize": "5"}, "axislabel": {"fontSize": "5"}}
+            )
+            G2 = pn.indicators.Gauge(
+                name=f'BATT\n\n{batt_v}V',
+                value=batt_v, bounds=(48, 58), 
+                colors=[(0.15, alarm_color), (0.3, warning_color), (0.7, happy_color),(0.85, warning_color), (1.0, alarm_color)],
+                title_size=15, height=220, num_splits=5, 
+                custom_opts={"detail": {"fontSize": "5"}, "axislabel": {"fontSize": "5"}}
+            )
+            G3 = pn.indicators.Gauge(
+                name=f'AC\n\n{ac_watts}W',
+                value=ac_watts, bounds=(0, 1500), 
+                colors=[(0.3, happy_color), (0.6, warning_color), (1.0, alarm_color)],
+                title_size=15, height=220, num_splits=5, 
+                custom_opts={"detail": {"fontSize": "5"}, "axislabel": {"fontSize": "5"}}
+            )
+            G4 = pn.indicators.Gauge(
+                name=f'DC\n\n{dc_watts}W',
+                value=dc_watts, bounds=(0, 300), 
+                colors=[(0.4, happy_color), (0.7, warning_color), (1, alarm_color)],
+                title_size=15, height=220, num_splits=5, 
+                custom_opts={"detail": {"fontSize": "5"}, "axislabel": {"fontSize": "5"}}     
+            )
+            R = pn.Row(G1, G2, G3, G4, sizing_mode='stretch_width')
+            return R
+        except Exception as e:
+            return e
+
+
+class Plot_MultiY_scatter(dashboard.Plottables.Plot_scatter):
+    def __init__(self, datasource, variable, plotargs, ylims, vdims, labels, height=300, s=5):
+        super().__init__(datasource, variable, plotargs, height, s)
+        self.ylims = ylims
+        self.vdims = vdims # TODO: fix multi_y issues
+        self.labels=labels
+        self.plotargs['responsive'] = True
+        del self.plotargs['label']
+
+    def plot(self, dd):
+        try:
+            dd = self.postproc(dd)
+            plots = []
+            for v, vd, lab in zip(self.variable, self.vdims, self.labels):
+                plots.append(
+                    dd[self.datasource][v].hvplot.scatter(**self.plotargs, ylim=self.ylims[vd],
+                    #vdims=[vd],
+                    yaxis=vd,
+                    label=lab).opts(multi_y=True, legend_position='bottom_right')
+                )
+            p = hv.Overlay(plots).opts(multi_y=True, legend_position='top_left')
+            print('legend moved?')
+            #p.opts(multi_y=True)
+            return p
+        except Exception as e:
+            return e
+
+class mvpplot_scatter(dashboard.Plottables.Plot_scatter):
+    def __init__(self,variable, title, plotargs, augment=False, postproc = None):
+        plotargs.update({'x': 'time', 'xlabel':'time'})
+        pargs = plotargs
         if augment: pargs.update({'x':'time_'})
         super().__init__('mvp',variable, pargs)
         self.plotargs['title'] = title
@@ -211,154 +417,52 @@ class mvpplot_scatter(dashboard.Plottables.Plot_scatter):
         if postproc is not None:
             self.postproc = postproc
 
-class mvpplot_scatter_batts(mvpplot_scatter):
-    def plot(self, dd):
-        try:
-            try:
-                tcoords = [('time', dd['mvp'].time.values)]
-            except:
-                tcoords = [('time', dd['mvp'].time_.values)]
-            BatterySOC = xr.DataArray(dd['mvp'].BatterySOC.values, coords=tcoords, name='SOC [%]')
-            BatteryWatts = xr.DataArray(dd['mvp'].BatteryWatts.values, coords=tcoords, name='BattS [W]')
-
-            p = BatterySOC.hvplot(
-                grid=True, 
-                height=400, 
-                title='BATTERIES', 
-                label='SOC [%]',
-                color='mediumvioletred', responsive=True
-            ).opts(active_tools=['box_zoom']) * \
-            BatteryWatts.hvplot(
-                height=400, 
-                color='cornflowerblue', 
-                label='Batts [W]',
-                responsive=True
-            )
-            p.opts(multi_y=True)
-            return p
-        except Exception as e:
-            print(traceback.format_exc())
-            return e
-
-
-class mvpplot_scatter_renewables(mvpplot_scatter):
-    def plot(self, dd):
-        try:
-            try:
-                tcoords = [('time', dd['mvp'].time.values)]
-            except:
-                tcoords = [('time', dd['mvp'].time_.values)]
-            SolarWatts_E = xr.DataArray(dd['mvp'].SolarWatts_East.values  , coords=tcoords, name='East')
-            SolarWatts_W = xr.DataArray(dd['mvp'].SolarWatts_West.values  , coords=tcoords, name='West')
-            SolarWatts_S = xr.DataArray(dd['mvp'].SolarWatts_South.values , coords=tcoords, name='South')
-            SolarWatts_Tot = xr.DataArray(
-                SolarWatts_E.values + SolarWatts_S.values + SolarWatts_W.values, coords=tcoords, name='Total')
-            WindWatts = xr.DataArray(dd['mvp'].WindWatts.values, coords=tcoords, name='Wind [W]')
-            SolarWatts = xr.merge([SolarWatts_Tot, SolarWatts_E, SolarWatts_W, SolarWatts_S])
-
-            warning_color = 'khaki'
-
-            splot = SolarWatts.hvplot.scatter(
-                grid=True, 
-                s = 2, 
-                x = 'time', 
-                y = ['Total', 'East', 'West','South'],
-                color =  ['palevioletred', 'khaki', 'olive', 'darkgoldenrod'],
-                height=400, 
-                title='RENEWABLES',
-                label='Solar [W]',
-                responsive=True
-            )
-            p = splot*WindWatts.hvplot.scatter(
-                height=400, 
-                x = 'time', 
-                y = ['Wind [W]'], 
-                s = 2, 
-                color='teal', 
-                label='Wind',
-                responsive=True
-            )
-            p.opts(active_tools=['box_zoom'])
-            return p
-        except Exception as e:
-            print(traceback.format_exc())
-            return e
-
-def postproc_mvp_batts(dd):
-    tdim = [k for k in dd['mvp'].sizes.keys() if 'time' in k][0]
-    print('lnmepnfepmfepomfspomfmfespomf', tdim)
-    tcoords = [('time', dd['mvp'][tdim].values)]
-    
-    BatterySOC = xr.DataArray(dd['mvp'].BatterySOC.values, coords=tcoords, name='SOC [%]')
-    
-    BatteryWatts = xr.DataArray(dd['mvp'].BatteryWatts.values, coords=tcoords, name='Power [W]')
-
-    dd['batts'] = xr.merge([BatterySOC,BatteryWatts])
-    return dd
-
-
-def postproc_mvp_renewables(dd):
-    #dd = { 'mvp': xr.Dataset(mvp data) }
-    tdim = [k for k in dd['mvp'].sizes.keys() if 'time' in k][0]
-    print('lnmepnfepmfepomfspomfmfespomf', tdim)
-    tcoords = [('time', dd['mvp'][tdim].values)]
-
-    SolarWatts_E = xr.DataArray(dd['mvp'].SolarWatts_East.values  , coords=tcoords, name='East')
-    SolarWatts_W = xr.DataArray(dd['mvp'].SolarWatts_West.values  , coords=tcoords, name='West')
-    SolarWatts_S = xr.DataArray(dd['mvp'].SolarWatts_South.values , coords=tcoords, name='South')
-    SolarWatts_Tot = xr.DataArray(
-        SolarWatts_E.values + SolarWatts_S.values + SolarWatts_W.values, coords=tcoords, name='Total')
-    
-    WindWatts = xr.DataArray(dd['mvp'].WindWatts.values, coords=tcoords, name='Wind')
-    RenewableWatts = xr.merge([SolarWatts_Tot, SolarWatts_E, SolarWatts_W, SolarWatts_S, WindWatts])
-
-    dd['renewable'] = RenewableWatts
-    return dd
-
 
 def get_mvp_tab(augment=False):
-    #p_batts = mvpplot_scatter_batts('battery', 'BATTERIES', augment=augment)
-    p_batts_soc = dashboard.Plottables.Plot_scatter(
-        'batts', 'SOC [%]',
-        plotargs={
-            'ylim':(-5,105), 'title':'BATTERIES',
-            'color': 'mediumvioletred','responsive':True, 'multi_y':True
-        },
-        postproc=postproc_mvp_batts
-    )
-    p_batts_soc.datasource = 'batts'
-    p_batts_soc.postproc = postproc_mvp_batts
-    p_batts_power = dashboard.Plottables.Plot_scatter(
-        'batts', 'Power [W]',
-        plotargs={
-            'color':'cornflowerblue', 'ylim':(None,None), 'multi_y':True
-        }
-    )
-    p_batts_power.datasource = 'batts'
-    p_batts_power.postproc = postproc_mvp_batts
+    p_zero = dashboard.Plottables.Plot_hline('mvp', 'BatterySOC',{'color':'black'},0)
 
+    p_dials = mvp_dials_plot()
 
-    p_renenwables_1 = mvpplot_scatter(
-        ['Total', 'East', 'West', 'South', 'Wind'],
-        'RENEWABLES', augment=augment,
-        postproc=postproc_mvp_renewables
+    p_renewables= Plot_MultiY_scatter(
+        'mvp', 
+        ['SolarWatts_Tot', 'SolarWatts_E', 'SolarWatts_S', 'SolarWatts_W', 'WindWatts'], 
+        {'x':'time', 'xlabel':'time', 'title':'RENEWABLES'}, 
+        ylims={'left':(0,5000),'right':(0,2000)},
+        vdims=['left','left','left','left','right'],
+        labels=['Solar total', 'East', 'South', 'West', 'Wind']
     )
-    p_renenwables_1.plotargs.update(
-        {
-            'color': ['palevioletred','khaki', 'olive', 'darkgoldenrod', 'teal'],
-            #'label': ['Total', 'East', 'West', 'South', 'Wind']
-        }
+    p_SOC = mvpplot_scatter(
+        'BatterySOC', 'Battery State of Charge',
+        {'ylim':(-5,105), 'ylabel':'SOC %'},
+        augment=augment
     )
-    p_renenwables_1.datasource = 'renewable'
-    p_renenwables_1.postproc = postproc_mvp_renewables
+    p_batteryWatts = mvpplot_scatter(
+        'BatteryWatts', 'Battery Power', 
+        {'ylabel':'Power (W)'},
+        augment=augment
+    )*p_zero
 
-    p_renenwables = mvpplot_scatter_renewables('renewables', 'RENEWABLES', augment=augment)
+    p_ACDC = mvpplot_scatter(
+        ['ACOutputWatts', 'DCWatts'], 'OUTPUT',
+        {'label':['AC', 'DC'], 'ylim':(-100, None)},
+        augment=augment
+    )
+    p_ACDC= Plot_MultiY_scatter(
+        'mvp', 
+        ['ACOutputWatts', 'DCWatts'], 
+        {'x':'time', 'xlabel':'time', 'title':'OUTPUT'}, 
+        ylims={'left':(-100,None)},
+        vdims=['left','left'],
+        labels=['AC', 'DC']
+    )
 
     #tab
     mvp_tab = dashboard.Tab.Tab(
         'MVP', 
         #[p_renenwables_1, p_renenwables],
-        [p_batts_soc*p_batts_power, p_renenwables_1, p_renenwables],
+        #[p_batts_soc*p_batts_power, p_renenwables_1, p_renenwables,p_renewables_new],
+        [p_dials],
+        #[p_dials, p_SOC, p_batteryWatts, p_renewables, p_ACDC * p_zero],
         dld, ['mvp'], 
         'Minimum Viable Powersystem',augment_dims=augment
     )
@@ -378,8 +482,17 @@ def preproc_GFS(gfs):
         data = [gfs.time.values], dims=['init_time','time_index']
     )
     gfs['recency'] = (gfs.time - gfs.init_time)
-    gfs['recency_alpha'] = 1 - 0.9 * gfs['recency'] / np.max(gfs['recency'])
+    
+    #f_alpha = lambda x,n: 0.1+ 0.9* ( 1 - np.power(x,n))
+    f_alpha = lambda x,n: (1 - x) * np.exp(-4*np.power(x,2))
+    
+    #gfs['recency_alpha'] = 1 - 0.9 * gfs['recency'] / np.max(gfs['recency'])
+    
+    gfs['recency_alpha']=f_alpha( gfs['recency']/np.max(gfs['recency']), 0.25)
+
     return gfs
+
+
 
 class DataLoader_GFS(dashboard.DataLoader.DataLoader):
     def _get_files_from_dtr(self, dtr: tuple[dt.datetime, dt.datetime]) -> list[str]:
@@ -445,8 +558,11 @@ def get_tabview(dld, augment) -> dashboard.TabView.TabView:
             #get_mvp_tab(augment),
             get_lidar_tab(augment),
             get_radar_tab(augment),
+            get_mwr_tab(augment),
+            get_asfs_tab(augment),
             get_gpr_tab(augment),
             get_simba_tab(augment),
+            get_mvp_tab(augment),
             get_gfs_tab(augment),
         ],
         dld=dld,
@@ -469,7 +585,7 @@ serve_dashboard = lambda: oop_dashboard(dtp_args, dld)
 pn.serve(serve_dashboard,title='OOP Dashboard', port=5006, websocket_origin='*', show=True )
 
 # Framework for testing a singular desired tab
-#tab = get_gfs_tab()
+#tab = get_asfs_tab()
 #tab.dld = dld
 #pn.serve(tab, port=5006, websocket_origin='*', show=True)
 

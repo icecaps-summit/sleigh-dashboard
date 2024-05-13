@@ -29,3 +29,9 @@ def get_radar_tab(augment=False):
     )
     return radar_tab
 
+
+if __name__ == '__main__':
+    from panel import serve
+    tab = get_radar_tab()
+    tab.dld = {'mrr':DL_mrr}
+    serve(tab, port=5006, websocket_origin='*', show=True)

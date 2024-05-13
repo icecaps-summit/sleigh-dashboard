@@ -48,3 +48,10 @@ def get_gpr_tab(augment=False):
        augment_dims=augment 
     )
     return gpr_tab
+
+
+if __name__ == '__main__':
+    from panel import serve
+    tab = get_gpr_tab()
+    tab.dld = {'gpr5':DL_gpr5, 'gpr7':DL_gpr7}
+    serve(tab, port=5006, websocket_origin='*', show=True)

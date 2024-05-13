@@ -59,3 +59,10 @@ def get_asfs_tab(augment=False):
         augment_dims=augment
     )
     return asfs_tab
+
+
+if __name__ == '__main__':
+    from panel import serve
+    tab = get_asfs_tab()
+    tab.dld = {'asfs':DL_asfs_slow}
+    serve(tab, port=5006, websocket_origin='*', show=True)

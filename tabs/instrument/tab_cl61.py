@@ -28,3 +28,10 @@ def get_lidar_tab(augment=False):
         augment_dims=augment
     )
     return lidar_tab
+
+
+if __name__ == '__main__':
+    from panel import serve
+    tab = get_lidar_tab()
+    tab.dld = {'cl61':DL_cl61}
+    serve(tab, port=5006, websocket_origin='*', show=True)

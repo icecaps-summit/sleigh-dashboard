@@ -33,3 +33,10 @@ def get_mwr_tab(augment=False):
         augment_dims=augment
     )
     return mwr_tab
+
+
+if __name__ == '__main__':
+    from panel import serve
+    tab = get_mwr_tab()
+    tab.dld = {'mwr':DL_mwr}
+    serve(tab, port=5006, websocket_origin='*', show=True)

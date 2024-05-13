@@ -173,3 +173,10 @@ def get_mvp_tab(augment=False):
     )
     
     return mvp_tab
+
+
+if __name__ == '__main__':
+    from panel import serve
+    tab = get_mvp_tab()
+    tab.dld = {'mvp':DL_mvp}
+    serve(tab, port=5006, websocket_origin='*', show=True)

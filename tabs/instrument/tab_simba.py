@@ -45,3 +45,10 @@ def get_simba_tab(augment=False):
         augment_dims=augment
     )
     return simba_tab
+
+
+if __name__ == '__main__':
+    from panel import serve
+    tab = get_simba_tab()
+    tab.dld = {'simba':DL_simba}
+    serve(tab, port=5006, websocket_origin='*', show=True)

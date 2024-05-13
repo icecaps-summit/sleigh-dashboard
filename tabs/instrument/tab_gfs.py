@@ -73,3 +73,10 @@ def get_gfs_tab(augment=False):
         'GFS', [p_Ts, p_Ps, p_ws, p_wd, p_pr], None, ['gfs'], 'GFS weather', augment_dims=augment
     )
     return gfs_tab
+
+
+if __name__ == '__main__':
+    from panel import serve
+    tab = get_gfs_tab()
+    tab.dld = {'gfs':DL_gfs}
+    serve(tab, port=5006, websocket_origin='*', show=True)

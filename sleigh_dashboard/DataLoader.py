@@ -124,7 +124,8 @@ class DataLoader:
             )
             self.loaded_files.append(f)
 
-        self.data = xr.concat(ds_to_merge, dim=self.concat_dim).sortby(self.sortby_dim)
+        # TODO: assess if coords='minimal' causes issues
+        self.data = xr.concat(ds_to_merge, dim=self.concat_dim, coords='minimal').sortby(self.sortby_dim)
         return
 
     def _get_files_from_dtr(self,

@@ -116,7 +116,8 @@ class Plot_scatter(BasePlottable):
     '''Plottable class for the scatter plots.'''
     def __init__(self, datasource, variable, plotargs, height=300, s=5, marker='+', postproc=postproc_identity):
         
-        super().__init__(datasource, variable, plotargs, postproc=postproc_identity)
+        super().__init__(datasource, variable, plotargs, postproc=postproc)
+
         
         self.plotargs['height'] = height
         self.plotargs['s'] = 5
@@ -178,7 +179,6 @@ class Plot_line_scatter(BasePlottable):
             dd = self.postproc(dd)
             line = dd[self.datasource][self.variable].hvplot.line(**self.plotargs, line_width=self.lw)
             points = dd[self.datasource][self.variable].hvplot.scatter(**self.plotargs, s=self.s, marker=self.marker)
-
             return line*points
         
         except Exception as e:

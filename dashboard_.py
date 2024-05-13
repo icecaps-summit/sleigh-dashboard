@@ -44,41 +44,53 @@ def create_tabs():
         value = (start_yyday, now), enable_seconds=False, start=epoch
     )
 
+    def get_dtrange_data(dtrange, start, end):
+        '''Function to get the data associated with the global datetime range picker, and bind it to a dictionary object'''
+        dtrange_data = {}
+        dtrange_data['dtrange'] = dtrange
+        dtrange_data['start'] = start
+        dtrange_data['end'] = end
+        return dtrange_data
+         
+    dtrange_data = pn.bind(get_dtrange_data, datetimerange_select, datetimerange_select.start, datetimerange_select.end)
+
     #power_title   = pn.pane.Markdown('# ICECAPS MELT — MVP Dashboard' ) 
-    t_mvp = pn.bind(tab_mvp.tab_mvp, dtrange=datetimerange_select)
-    tabs = pn.Tabs(('Minimum Viable Powersupply', t_mvp))
+    #t_mvp = pn.bind(tab_mvp.tab_mvp, dtrange=datetimerange_select)
+    #tabs = pn.Tabs(('Minimum Viable Powersupply', t_mvp))
 
     #################### INSTRUMENT UPTIME #####################
-    tabs.append(('Instrument Uptime', pn.pane.Markdown('# Coming soon...')))
+    #tabs.append(('Instrument Uptime', pn.pane.Markdown('# Coming soon...')))
 
     ds_cl61 = tab_cl61.load_cl61()
-    ds_asfs = tab_asfs.load_asfs()
-    ds_mrr = tab_mrr.load_mrr()
-    ds_simba = tab_simba.load_simba()
-    ds_gpr = tab_gpr.load_gpr()
+    #ds_asfs = tab_asfs.load_asfs()
+    #ds_mrr = tab_mrr.load_mrr()
+    #ds_simba = tab_simba.load_simba()
+    #ds_gpr = tab_gpr.load_gpr()
 
     print('tcl61')
-    t_cl61 = pn.bind(tab_cl61.tab_cl61, dtrange=datetimerange_select, ds=ds_cl61)
-    tabs.append(('CL61', t_cl61))
+    t_cl61 = tab_cl61.tab_cl61_load_overhaul(dtrange_data)
+    #t_cl61 = pn.bind(tab_cl61.tab_cl61, dtrange=datetimerange_select, ds=ds_cl61)
+    #tabs.append(('CL61', t_cl61))
+    tabs = pn.Tabs(('CL61', t_cl61))
     
-    print('tasfs')
-    t_asfs = pn.bind(tab_asfs.tab_asfs, dtrange=datetimerange_select, ds=ds_asfs)
-    tabs.append(('ASFS', t_asfs))
+    #print('tasfs')
+    #t_asfs = pn.bind(tab_asfs.tab_asfs, dtrange=datetimerange_select, ds=ds_asfs)
+    #tabs.append(('ASFS', t_asfs))
     
-    print('tmrr')
-    t_mrr = pn.bind(tab_mrr.tab_mrr, dtrange=datetimerange_select, ds=ds_mrr)
-    tabs.append(('MRR', t_mrr))
+    #print('tmrr')
+    #t_mrr = pn.bind(tab_mrr.tab_mrr, dtrange=datetimerange_select, ds=ds_mrr)
+    #tabs.append(('MRR', t_mrr))
 
-    print('tsimba')
-    t_simba = pn.bind(tab_simba.tab_simba, dtrange=datetimerange_select, ds=ds_simba)
-    tabs.append(('SIMBA', t_simba))
+    #print('tsimba')
+    #t_simba = pn.bind(tab_simba.tab_simba, dtrange=datetimerange_select, ds=ds_simba)
+    #tabs.append(('SIMBA', t_simba))
 
-    print('tgpr')
-    t_gpr = pn.bind(tab_gpr.tab_gpr, dtrange=datetimerange_select, ds=ds_gpr)
-    tabs.append(('GPR', t_gpr))
+    #print('tgpr')
+    #t_gpr = pn.bind(tab_gpr.tab_gpr, dtrange=datetimerange_select, ds=ds_gpr)
+    #tabs.append(('GPR', t_gpr))
     
-    tabs.append(('MWR', pn.pane.Markdown('# Coming soon...')))
-    tabs.append(('BLE', pn.pane.Markdown('# Coming soon...')))
+    #tabs.append(('MWR', pn.pane.Markdown('# Coming soon...')))
+    #tabs.append(('BLE', pn.pane.Markdown('# Coming soon...')))
 
     display = pn.Column(
         datetimerange_select,

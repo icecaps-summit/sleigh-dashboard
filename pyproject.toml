@@ -1,0 +1,34 @@
+[project]
+name='sleigh-dashboard'
+version='0.1.0'
+description="The codebase for the ICECAPS MELT project's SLEIGH dashboard."
+authors=[
+    {name='Andrew Martin', email='andrew.martin@ncas.ac.uk'},
+    {name='Von P. Walden'},
+    {name='Michael Gallagher'}
+]
+maintainers=[
+    {name='Andrew Martin', email='andrew.martin@ncas.ac.uk'}
+]
+readme='README.md'
+#TODO: include a license file
+
+dependencies=[
+    'panel',
+    'hvplot',
+    'holoviews',
+    'bokeh',
+    'dask',
+    'netcdf4',
+    'xarray',
+    'pandas',
+    'numpy',
+    'jupyter',
+    'ipykernel',
+    'jupyter-bokeh'
+]
+
+
+[build-system]
+requires=["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"

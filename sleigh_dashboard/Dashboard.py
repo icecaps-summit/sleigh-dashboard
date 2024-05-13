@@ -62,7 +62,7 @@ class Dashboard:
 
         def main_content(compare):
             tabs_in_row = [left_spacer,self.tabview]
-            if compare:
+            if compare: #TODO: this often shits the bed, needs rigorous testing
                 new_tabview = self.tabview_func(self.dld, True)
                 new_tabview.bind_gdtp(self.gdtp)
                 tabs_in_row = [*tabs_in_row, 

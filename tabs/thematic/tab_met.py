@@ -35,3 +35,13 @@ def get_met_tab(augment=False):
         augment_dims=augment
     )
     return tab_met
+
+
+if __name__ == '__main__':
+    from panel import serve
+    dld = {
+        'asfs': DataLoader.DataLoader('asfs','/data/asfs', 'summary_asfs_slow_%Y%m%d.nc')
+    }
+    tab = get_met_tab()
+    tab.dld = dld
+    serve(tab, port=5006, websocket_origin='*', show=True)

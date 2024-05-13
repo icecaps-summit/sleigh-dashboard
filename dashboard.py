@@ -5,15 +5,11 @@ import xarray as xr
 import hvplot.xarray # noqa
 import holoviews as hv
 import panel as pn
+import datetime as dt
 
-import time, datetime, traceback, sys
+import time, traceback, sys
 
-from tabs import tab_cl61
-from tabs import tab_asfs
-from tabs import tab_mrr
-from tabs import tab_mvp
-from tabs import tab_simba
-from tabs import tab_gpr
+import dashboard_instrument, dashboard_thematic
 
 pn.extension(design='material', template='material')
 
@@ -24,72 +20,23 @@ from multiprocessing import Process
 import warnings
 warnings.filterwarnings("ignore")
 
-sys.path.insert(0,'/home/website_admin/sleigh-dashboard/tabs')
-
-alarm_color   = 'palevioletred'
-warning_color = 'khaki'
-happy_color   = 'mediumseagreen'
-
 pn.extension('echarts', template='fast', nthreads=4, notifications=False)
 
-def create_tabs():
-    # create the datetimerange picker and update button that appear on all tabs
-    now = datetime.datetime.now()
-    t_day_start = datetime.time(0,0,0)
-    t_yyday = datetime.date.today() - datetime.timedelta(days=2)
-    start_yyday = datetime.datetime.combine(t_yyday, t_day_start)
-    epoch=datetime.date(2024,3,1)
-    datetimerange_select = pn.widgets.DatetimeRangePicker(
-        name='Default time range:',
-        value = (start_yyday, now), enable_seconds=False, start=epoch
-    )
+# Create the standard global datetime picker choices. Specific datetime-limitted dashboards (i.e. melt events) should have their datetime ranges specified in their files
+start = dt.datetime(2024,5,9)
+end = None#dt.datetime(2024,3,25) # deliberately including days at the end where data doesn't exist, DataLoader should be impervious to these problems...
+now = dt.datetime.now()
+dtr_end = dt.datetime(year=now.year, month=now.month, day=now.day)
+one_day = dt.timedelta(days=1)
+dtr = (dtr_end-one_day, dtr_end) # should start by displaying two days of data
+dtp_args = {'value':dtr, 'start':start, 'end':end, 'name':'global dtp picker'}
 
-    #power_title   = pn.pane.Markdown('# ICECAPS MELT — MVP Dashboard' ) 
-    t_mvp = pn.bind(tab_mvp.tab_mvp, dtrange=datetimerange_select)
-    tabs = pn.Tabs(('Minimum Viable Powersupply', t_mvp))
+db_instrument = lambda: dashboard_instrument.dashboard_instruments(dtp_args, dashboard_instrument.create_dld())
+db_thematic = lambda: dashboard_thematic.dashboard_thematic(dtp_args, dashboard_instrument.create_dld())
 
-    #################### INSTRUMENT UPTIME #####################
-    tabs.append(('Instrument Uptime', pn.pane.Markdown('# Coming soon...')))
-
-    ds_cl61 = tab_cl61.load_cl61()
-    ds_asfs = tab_asfs.load_asfs()
-    ds_mrr = tab_mrr.load_mrr()
-    ds_simba = tab_simba.load_simba()
-    ds_gpr = tab_gpr.load_gpr()
-
-    print('tcl61')
-    t_cl61 = pn.bind(tab_cl61.tab_cl61, dtrange=datetimerange_select, ds=ds_cl61)
-    tabs.append(('CL61', t_cl61))
-    
-    print('tasfs')
-    t_asfs = pn.bind(tab_asfs.tab_asfs, dtrange=datetimerange_select, ds=ds_asfs)
-    tabs.append(('ASFS', t_asfs))
-    
-    print('tmrr')
-    t_mrr = pn.bind(tab_mrr.tab_mrr, dtrange=datetimerange_select, ds=ds_mrr)
-    tabs.append(('MRR', t_mrr))
-
-    print('tsimba')
-    t_simba = pn.bind(tab_simba.tab_simba, dtrange=datetimerange_select, ds=ds_simba)
-    tabs.append(('SIMBA', t_simba))
-
-    print('tgpr')
-    t_gpr = pn.bind(tab_gpr.tab_gpr, dtrange=datetimerange_select, ds=ds_gpr)
-    tabs.append(('GPR', t_gpr))
-    
-    tabs.append(('MWR', pn.pane.Markdown('# Coming soon...')))
-    tabs.append(('BLE', pn.pane.Markdown('# Coming soon...')))
-
-    display = pn.Column(
-        datetimerange_select,
-        tabs
-    )
-
-    return display
 
 
 def launch_server_process(panel_dict, port):
-
     server_thread = pn.serve(panel_dict, title='ICECAPS SLEIGH-MVP Dashboard',
                              port=port, websocket_origin='*', show=False)
     return True # not necessary but explicit
@@ -107,11 +54,10 @@ def print_traceback(thetb, error_msg):
 def main(port=6646):
     while True:           
         try:
-            print('creating tabs')
-            tabs = create_tabs
-            print('tabs created')
-            print(f'{type(tabs)=}')
-            panel_dict = {'dashboard': tabs} # if you make other pages, add them here... 
+            panel_dict = {
+                'instrument': db_instrument,
+                #'thematic': db_thematic
+            } # if you make other pages, add them here... 
 
             p = Process(target=launch_server_process, args=(panel_dict,port))
             p.start()

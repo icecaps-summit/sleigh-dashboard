@@ -70,7 +70,7 @@ def dashboard_instruments(dtp_args,dld):
     return db
 
 
-if __name__ == '__main__':
+def serve_dashboard_instruments(dld):
     # global datetime picker arguments
     start = dt.datetime(2024,5,9)
     end = None#dt.datetime(2024,3,25) # deliberately including days at the end where data doesn't exist, DataLoader should be impervious to these problems...
@@ -80,6 +80,12 @@ if __name__ == '__main__':
     one_day = dt.timedelta(days=1)
     dtr = (dtr_end-one_day, dtr_end) # should start by displaying two days of data
     dtp_args = {'value':dtr, 'start':start, 'end':end, 'name':'global dtp picker'}
+    
+    serve = lambda: dashboard_instruments(dtp_args, dld)
+    return serve
 
-    serve_dashboard = lambda: dashboard_instruments(dtp_args, create_dld())
-    pn.serve(serve_dashboard,title='OOP Dashboard', port=5006, websocket_origin='*', show=True )
+
+if __name__ == '__main__':
+    dld = create_dld()
+    db_func = serve_dashboard_instruments(dld)
+    pn.serve(db_func,title='Instrument dashboard -- test', port=5006, websocket_origin='*', show=True)

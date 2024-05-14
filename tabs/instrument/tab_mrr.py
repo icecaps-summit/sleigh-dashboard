@@ -17,8 +17,8 @@ class radarplot(Plottables.Plot_2D):
 
 def get_radar_tab(augment=False):
     plot_Z = radarplot('Z_median', 'Z median (dBZ)', clim=(-10, 30), augment=augment)
-    plot_VEL = radarplot('VEL_median', 'Doppler VEL median (m/s)', clim=(-10,10), augment=augment, cmap='RdBu')
-    plot_WIDTH = radarplot('WIDTH_median', 'Dopper WIDTH median (m/s)', clim=(5e-3, 5), cnorm='log', augment=augment, cmap='magma')
+    plot_VEL = radarplot('VEL_median', 'Doppler VEL median (m/s)', clim=(-2,6), augment=augment, cmap='RdBu')
+    plot_WIDTH = radarplot('WIDTH_median', 'Spectrum WIDTH median (m/s)', clim=(0, 2), cnorm='linear', augment=augment, cmap='magma')
     radar_tab = Tab.Tab(
         name='MRR',
         plottables=[plot_Z, plot_VEL, plot_WIDTH],

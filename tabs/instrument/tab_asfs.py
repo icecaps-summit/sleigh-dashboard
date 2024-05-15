@@ -7,11 +7,11 @@ def DL_asfs_slow():
     return DataLoader.DataLoader('asfs', '/data/asfs','summary_asfs_slow_%Y%m%d.nc')
 
 class asfsplot(Plottables.Plot_line_scatter):
-    def __init__(self, variable: str | list[str], plotargs: dict, title ,augment=False):
+    def __init__(self, variable: str | list[str], plotargs: dict, title ,augment=False, postproc=(lambda x:x)):
         plotargs['x'] = 'time'
         plotargs['xlabel'] = 'time'
         if augment: plotargs['x'] = 'time_'
-        super().__init__('asfs', variable, plotargs)
+        super().__init__('asfs', variable, plotargs, postproc=postproc)
         self.plotargs['title'] = title
 
 
@@ -38,9 +38,15 @@ def get_asfs_tab(augment=False):
         asfsplot('sr30_swu_heatA_mean', {'label':'SWU', 'ylabel': 'Heater (mA)'}, 'RAD HEATERS', augment=augment) * \
         asfsplot('sr30_swd_heatA_mean', {'label':'SWD'}, 'RAD HEATERS', augment=augment)
 
+
+    def pproc_rad_tilt(dd):
+        mod_180 = lambda x: (x + 90)%180 - 90
+        dd['asfs']['swu_tilt'] = mod_180(dd['asfs']['sr30_swu_tilt_mean'])
+        dd['asfs']['swd_tilt'] = mod_180(dd['asfs']['sr30_swd_tilt_mean'])
+        return dd
     p_rad_tilt = \
-        asfsplot('sr30_swu_tilt_mean', {'label':'SWU', 'ylabel':'tilt (deg)'}, 'SW RADIOMEER TILT', augment=augment) *\
-        asfsplot('sr30_swd_tilt_mean', {'label':'SWD'}, 'SW RADIOMETER TILT', augment=augment)
+        asfsplot('swu_tilt', {'label':'SWU', 'ylabel':'tilt (deg)'}, 'SW RADIOMEER TILT', postproc=pproc_rad_tilt, augment=augment) *\
+        asfsplot('swd_tilt', {'label':'SWD'}, 'SW RADIOMETER TILT', postproc=pproc_rad_tilt, augment=augment)
     
     p_metek_tilt = \
         asfsplot('metek_InclX_mean', {'label':'X', 'ylabel':'tilt (deg)'}, 'SONIC TILT', augment=augment) *\

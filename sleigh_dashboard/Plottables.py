@@ -80,7 +80,6 @@ class BasePlottable:
                 #    ylim_set = True
             #    break
             if ylim_set: hvo.opts(multi_y=True)
-            print(hvo)
             return pn.Column(
                 hvo, *erroneous_outputs
             )

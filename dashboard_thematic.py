@@ -18,18 +18,19 @@ import traceback
 import sleigh_dashboard as dashboard
 import tabs.thematic
 import tabs.instrument
+from dashboard_instrument import create_dld
 
 DL_asfs = tabs.instrument.tab_asfs.DL_asfs_slow
 
-dld = {
-    'asfs':DL_asfs
-}
+dld = create_dld()
 
 def get_tabview(dld, augment) -> dashboard.TabView.TabView:
     tabview = dashboard.TabView.TabView(
         tablist=[
             #get_mvp_tab(augment),
-            tabs.thematic.tab_met.get_met_tab(augment)
+            tabs.thematic.tab_met.get_met_tab(augment),
+            tabs.thematic.tab_clouds.get_clouds_tab(augment),
+            tabs.thematic.tab_seb.get_seb_tab(augment)
         ],
         dld=dld,
         augment_dims=augment

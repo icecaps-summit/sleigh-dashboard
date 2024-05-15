@@ -53,6 +53,7 @@ def get_tabview(dld, augment) -> dashboard.TabView.TabView:
             tabs.instrument.tab_mrr.get_radar_tab(augment),
             tabs.instrument.tab_mwr.get_mwr_tab(augment),
             tabs.instrument.tab_asfs.get_asfs_tab(augment),
+            tabs.instrument.tab_turb.get_turb_tab(augment),
             tabs.instrument.tab_gpr.get_gpr_tab(augment),
             tabs.instrument.tab_simba.get_simba_tab(augment),
             tabs.instrument.tab_mvp.get_mvp_tab(augment),

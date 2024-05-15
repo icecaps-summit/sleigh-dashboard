@@ -56,7 +56,7 @@ def main(port=6646):
         try:
             panel_dict = {
                 'instrument': db_instrument,
-                #'thematic': db_thematic
+                'thematic': db_thematic
             } # if you make other pages, add them here... 
 
             p = Process(target=launch_server_process, args=(panel_dict,port))

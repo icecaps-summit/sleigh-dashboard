@@ -3,7 +3,8 @@ warnings.filterwarnings("once")
 
 from sleigh_dashboard import DataLoader, Plottables, Tab
 
-DL_simba = DataLoader.DataLoader('simba', '/data/simba', 'summary_simba_%Y%m%d.nc')
+def DL_simba():
+    return DataLoader.DataLoader('simba', '/data/simba', 'summary_simba_%Y%m%d.nc')
 
 
 class simbaplot_2d(Plottables.Plot_2D):
@@ -50,5 +51,5 @@ def get_simba_tab(augment=False):
 if __name__ == '__main__':
     from panel import serve
     tab = get_simba_tab()
-    tab.dld = {'simba':DL_simba}
+    tab.dld = {'simba':DL_simba()}
     serve(tab, port=5006, websocket_origin='*', show=True)

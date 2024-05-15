@@ -3,7 +3,8 @@ warnings.filterwarnings("once")
 
 from sleigh_dashboard import DataLoader, Plottables, Tab
 
-DL_asfs_turb = DataLoader.DataLoader('turb', '/data/asfs','summary_asfs_turb_%Y%m%d.nc')
+def DL_asfs_turb():
+    return DataLoader.DataLoader('turb', '/data/asfs','summary_asfs_turb_%Y%m%d.nc')
 
 class asfsplot(Plottables.Plot_line_scatter):
     def __init__(self, variable: str | list[str], plotargs: dict, title ,augment=False):
@@ -44,5 +45,5 @@ def get_turb_tab(augment=False):
 if __name__ == '__main__':
     from panel import serve
     tab = get_turb_tab()
-    tab.dld = {'turb':DL_asfs_turb}
+    tab.dld = {'turb':DL_asfs_turb()}
     serve(tab, port=5006, websocket_origin='*', show=True)

@@ -3,7 +3,8 @@ warnings.filterwarnings("once")
 
 from sleigh_dashboard import DataLoader, Plottables, Tab
 
-DL_mwr = DataLoader.DataLoader('mwr', '/data/mwr', 'summary_mwr_%Y%m%d.nc')
+def DL_mwr():
+    return DataLoader.DataLoader('mwr', '/data/mwr', 'summary_mwr_%Y%m%d.nc')
 
 class mwr_plot(Plottables.Plot_line_scatter):
     def __init__(self, variable, title, plotargs={}, augment=False):
@@ -38,5 +39,5 @@ def get_mwr_tab(augment=False):
 if __name__ == '__main__':
     from panel import serve
     tab = get_mwr_tab()
-    tab.dld = {'mwr':DL_mwr}
+    tab.dld = {'mwr':DL_mwr()}
     serve(tab, port=5006, websocket_origin='*', show=True)

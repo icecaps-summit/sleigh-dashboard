@@ -33,7 +33,8 @@ def mvp_load_preproc(mvp):
     mvp.DCWatts.name = 'DC [W]'
     return mvp
 
-DL_mvp = DataLoader.DataLoader('mvp', '/data/power/level2', 'power.mvp.level2.1min.%Y%m%d.000000.nc', file_preproc=mvp_load_preproc)
+def DL_mvp():
+    return DataLoader.DataLoader('mvp', '/data/power/level2', 'power.mvp.level2.1min.%Y%m%d.000000.nc', file_preproc=mvp_load_preproc)
 
 class mvp_dials_plot(Plottables.BasePlottable):
     def __init__(self):
@@ -178,5 +179,5 @@ def get_mvp_tab(augment=False):
 if __name__ == '__main__':
     from panel import serve
     tab = get_mvp_tab()
-    tab.dld = {'mvp':DL_mvp}
+    tab.dld = {'mvp':DL_mvp()}
     serve(tab, port=5006, websocket_origin='*', show=True)

@@ -3,7 +3,8 @@ warnings.filterwarnings("once")
 
 from sleigh_dashboard import DataLoader, Plottables, Tab
 
-DL_mrr = DataLoader.DataLoader('mrr','/data/mrr', 'summary_mrr_%Y%m%d.nc')
+def DL_mrr():
+    return DataLoader.DataLoader('mrr','/data/mrr', 'summary_mrr_%Y%m%d.nc')
 
 class radarplot(Plottables.Plot_2D):
     def __init__(self, variable, title, clim, cmap='viridis', cnorm='linear',augment=False):
@@ -33,5 +34,5 @@ def get_radar_tab(augment=False):
 if __name__ == '__main__':
     from panel import serve
     tab = get_radar_tab()
-    tab.dld = {'mrr':DL_mrr}
+    tab.dld = {'mrr':DL_mrr()}
     serve(tab, port=5006, websocket_origin='*', show=True)

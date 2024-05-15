@@ -36,7 +36,8 @@ class DataLoader_GFS(DataLoader.DataLoader):
         return [v for fl in flist_list for v in fl]
 
 
-DL_gfs = DataLoader_GFS('gfs', '/data/weather/GFS', 'Raven_GFS_Global_0p5deg_%Y%m%d_*00.nc', sortby_dim='init_time', concat_dim = 'init_time', file_preproc=preproc_GFS)
+def DL_gfs():
+    return DataLoader_GFS('gfs', '/data/weather/GFS', 'Raven_GFS_Global_0p5deg_%Y%m%d_*00.nc', sortby_dim='init_time', concat_dim = 'init_time', file_preproc=preproc_GFS)
 
 class gfs_recency_alpha_plot(Plottables.Plot_scatter):
     def __init__(self, variable, title, plotargs={}, augment=False):
@@ -78,5 +79,5 @@ def get_gfs_tab(augment=False):
 if __name__ == '__main__':
     from panel import serve
     tab = get_gfs_tab()
-    tab.dld = {'gfs':DL_gfs}
+    tab.dld = {'gfs':DL_gfs()}
     serve(tab, port=5006, websocket_origin='*', show=True)

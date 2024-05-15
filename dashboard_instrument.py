@@ -28,18 +28,20 @@ DL_mrr = tabs.instrument.tab_mrr.DL_mrr
 DL_mwr = tabs.instrument.tab_mwr.DL_mwr
 DL_mvp = tabs.instrument.tab_mvp.DL_mvp
 DL_simba = tabs.instrument.tab_simba.DL_simba
+DL_turb = tabs.instrument.tab_turb.DL_asfs_turb
 
 def create_dld():
     dld = {
-        'asfs': DL_asfs,
-        'cl61': DL_cl61,
-        'gfs': DL_gfs,
-        'gpr5':DL_gpr5,
-        'gpr7':DL_gpr7, 
-        'mrr': DL_mrr,
-        'mwr': DL_mwr,
-        'mvp':DL_mvp,
-        'simba':DL_simba,
+        'asfs': DL_asfs(),
+        'cl61': DL_cl61(),
+        'gfs': DL_gfs(),
+        'gpr5':DL_gpr5(),
+        'gpr7':DL_gpr7(), 
+        'mrr': DL_mrr(),
+        'mwr': DL_mwr(),
+        'mvp':DL_mvp(),
+        'simba':DL_simba(),
+        'turb':DL_turb()
     }
     return dld
 

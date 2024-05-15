@@ -3,7 +3,8 @@ warnings.filterwarnings("once")
 
 from sleigh_dashboard import DataLoader, Plottables, Tab
 
-DL_cl61 = DataLoader.DataLoader('cl61', '/data/cl61/daily', 'summary_cl61_%Y%m%d.nc')
+def DL_cl61():
+    return DataLoader.DataLoader('cl61', '/data/cl61/daily', 'summary_cl61_%Y%m%d.nc')
 
 class lidarplot(Plottables.Plot_2D):
     def __init__(self, variable, title, clim, cmap='viridis', cnorm='linear', augment=False):
@@ -33,5 +34,5 @@ def get_lidar_tab(augment=False):
 if __name__ == '__main__':
     from panel import serve
     tab = get_lidar_tab()
-    tab.dld = {'cl61':DL_cl61}
+    tab.dld = {'cl61':DL_cl61()}
     serve(tab, port=5006, websocket_origin='*', show=True)

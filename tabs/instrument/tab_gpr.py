@@ -3,8 +3,10 @@ warnings.filterwarnings("once")
 
 from sleigh_dashboard import DataLoader, Plottables, Tab
 
-DL_gpr5 = DataLoader.DataLoader('gpr5', '/data/gpr', 'summary_gpr_5G_%Y%m%d.nc')
-DL_gpr7 = DataLoader.DataLoader('gpr7', '/data/gpr', 'summary_gpr_7G_%Y%m%d.nc')
+def DL_gpr5():
+    return DataLoader.DataLoader('gpr5', '/data/gpr', 'summary_gpr_5G_%Y%m%d.nc')
+def DL_gpr7():
+    return DataLoader.DataLoader('gpr7', '/data/gpr', 'summary_gpr_7G_%Y%m%d.nc')
 
 class gprplot_2d(Plottables.Plot_2D):
     def __init__(self, gpr, variable, title, clim=(None, None), cmap='viridis', cnorm='linear', augment=False):
@@ -53,5 +55,5 @@ def get_gpr_tab(augment=False):
 if __name__ == '__main__':
     from panel import serve
     tab = get_gpr_tab()
-    tab.dld = {'gpr5':DL_gpr5, 'gpr7':DL_gpr7}
+    tab.dld = {'gpr5':DL_gpr5(), 'gpr7':DL_gpr7()}
     serve(tab, port=5006, websocket_origin='*', show=True)

@@ -24,7 +24,8 @@ def get_asfs_tab(augment=False):
     
     p_fp = \
         asfsplot('fp_A_Wm2_mean', {'label':'A', 'ylabel':'Power (W/m2)'}, 'FLUX PLATES', augment=augment) * \
-        asfsplot('fp_B_Wm2_mean', {'label':'B'}, 'FLUX PLATES', augment=augment)
+        asfsplot('fp_B_Wm2_mean', {'label':'B'}, 'FLUX PLATES', augment=augment) *\
+        asfsplot('fp_C_Wm2_mean', {'label':'C'}, 'FLUX PLATES', augment=augment)
     
     p_fantach = \
         asfsplot('sr30_swu_fantach_mean', {'label':'SWU', 'ylabel': 'tachometer (Hz)'},'SW FANS', augment=augment) * \
@@ -36,6 +37,14 @@ def get_asfs_tab(augment=False):
     p_rad_heat = \
         asfsplot('sr30_swu_heatA_mean', {'label':'SWU', 'ylabel': 'Heater (mA)'}, 'RAD HEATERS', augment=augment) * \
         asfsplot('sr30_swd_heatA_mean', {'label':'SWD'}, 'RAD HEATERS', augment=augment)
+
+    p_rad_tilt = \
+        asfsplot('sr30_swu_tilt_mean', {'label':'SWU', 'ylabel':'tilt (deg)'}, 'SW RADIOMEER TILT', augment=augment) *\
+        asfsplot('sr30_swd_tilt_mean', {'label':'SWD'}, 'SW RADIOMETER TILT', augment=augment)
+    
+    p_metek_tilt = \
+        asfsplot('metek_InclX_mean', {'label':'X', 'ylabel':'tilt (deg)'}, 'SONIC TILT', augment=augment) *\
+        asfsplot('metek_InclY_mean', {'label':'Y'}, 'SONIC TILT', augment=augment)
     
     p_sr50 = asfsplot('sr50_dist_mean', {'ylabel': 'Height (?)'}, 'SR50 SNOW HEIGHT', augment=augment)
 
@@ -50,10 +59,11 @@ def get_asfs_tab(augment=False):
     p_vaisala_T = asfsplot('vaisala_T_mean', {'ylabel': 'Temperature (C)'}, 'VAISALA TEMPERATURE', augment=augment)
     p_vaisala_P = asfsplot('vaisala_P_mean', {'ylabel': 'Pressure (?)'}, 'VAISALA PRESSURE', augment=augment)
     p_vaisala_RH = asfsplot('vaisala_RH_mean', {'ylabel': 'Relative humidity (%)'}, 'VAISALA RH', augment=augment)
+    p_skin = asfsplot('skin_temp_mean', {'ylabel':'Temperature (C)'}, 'SKIN TEMPERATURE', augment=augment)
     
     asfs_tab = Tab.Tab(
         'ASFS',
-        [p_rad, p_fp, p_sr50, p_wind, p_wind_dir, p_vaisala_T, p_vaisala_P, p_vaisala_RH, p_fantach, p_lw_fans, p_rad_heat],
+        [p_rad, p_fp, p_sr50, p_wind, p_wind_dir, p_skin, p_vaisala_T, p_vaisala_P, p_vaisala_RH, p_fantach, p_lw_fans, p_rad_heat, p_rad_tilt, p_metek_tilt],
         dld=None,
         required_DL=['asfs'],
         longname='Atmospheric Surface Flux Station',

@@ -18,20 +18,20 @@ class asfsplot(Plottables.Plot_line_scatter):
 def get_turb_tab(augment=False):
     
     p_flux = \
-        asfsplot('Hs', {'label': 'Hs', 'ylabel':'Flux (Wm2)'}, 'HEAT FLUXES', augment=augment) *\
-        asfsplot('Hl', {'label': 'Hl'}, 'HEAT FLUXES', augment=augment) *\
-        asfsplot('turb_Hs', {'label': 'turb_Hs'}, 'HEAT FLUXES', augment=augment) *\
-        asfsplot('turb_Hl', {'label': 'turb_Hl'}, 'HEAT FLUXES', augment=augment)
+        asfsplot('Hs_mean', {'label': 'Hs', 'ylabel':'Flux (Wm2)'}, 'HEAT FLUXES', augment=augment) *\
+        asfsplot('Hl_mean', {'label': 'Hl'}, 'HEAT FLUXES', augment=augment) *\
+        asfsplot('bulk_Hs_mean', {'label': 'turb_Hs'}, 'HEAT FLUXES', augment=augment) *\
+        asfsplot('bulk_Hl_mean', {'label': 'turb_Hl'}, 'HEAT FLUXES', augment=augment)
     
     p_drag = \
-        asfsplot('Cd', {'label':'Cd', 'ylabel':'Drag coefficient (units?)'}, 'DRAG COEFICIENT', augment=augment)*\
-        asfsplot('turb_Cd', {'label':'turb_Cd'}, 'DRAG COEFFICIENT', augment=augment)
+        asfsplot('Cd_mean', {'label':'Cd', 'ylabel':'Drag coefficient (units?)'}, 'DRAG COEFICIENT', augment=augment)*\
+        asfsplot('bulk_Cd_mean', {'label':'turb_Cd'}, 'DRAG COEFFICIENT', augment=augment)
     
     p_ustar = \
-        asfsplot('ustar', {'label':'ustar', 'ylabel':'ustar (units?)'}, 'USTAR', augment=augment) * \
-        asfsplot('turb_ustar', {'label':'turb_ustar'}, 'USTAR', augment=augment)
+        asfsplot('ustar_mean', {'label':'ustar', 'ylabel':'ustar (units?)'}, 'USTAR', augment=augment) * \
+        asfsplot('bulk_ustar_mean', {'label':'turb_ustar'}, 'USTAR', augment=augment)
 
-    asfs_tab = Tab.Tab(
+    turb_tab = Tab.Tab(
         'turb',
         [p_flux, p_drag, p_ustar],
         dld=None,
@@ -39,7 +39,7 @@ def get_turb_tab(augment=False):
         longname='Atmospheric Surface Flux Station - Turbulence',
         augment_dims=augment
     )
-    return asfs_tab
+    return turb_tab
 
 
 if __name__ == '__main__':

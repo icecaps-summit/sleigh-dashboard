@@ -22,8 +22,9 @@ class BasePlottable:
     ):
         self.datasource = datasource
         self.variable = variable
-        self.plotargs = plotargs
+        self.plotargs = dict(plotargs) # creates a copy of the plotargs dictionary object, rather than a reference
         self.plotargs['responsive'] = True
+        #self.plotargs['active_tool'] = ['box_zoom']
         self.dd = None
         self.plotfuncs = [self.plot]
         self.postproc = postproc
@@ -69,7 +70,7 @@ class BasePlottable:
         if hv_outputs:
             #TODO: fix the multi_y for multiplied plots, currently its fucked...
             try:
-                hvo = hv.Overlay(hv_outputs)
+                hvo = hv.Overlay(hv_outputs).opts(active_tools=['box_zoom'])
             except:
                 hvo = hv_outputs[0]
             ylim_set = False

@@ -53,8 +53,8 @@ def print_traceback(thetb, error_msg):
 
 def main(port=6646):
     panel_dict = {
+        'science': db_thematic,
         'instrument': db_instrument,
-        'thematic': db_thematic
     } # if you make other pages, add them here... 
 
     pn.serve(panel_dict, title='ICECAPS SLEIGH_MVP Dashboard', port=port, websocket_origin='*', show=False)

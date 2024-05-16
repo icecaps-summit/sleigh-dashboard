@@ -52,33 +52,13 @@ def print_traceback(thetb, error_msg):
 
 
 def main(port=6646):
-    while True:           
-        try:
-            panel_dict = {
-                'instrument': db_instrument,
-                'thematic': db_thematic
-            } # if you make other pages, add them here... 
+    panel_dict = {
+        'instrument': db_instrument,
+        'thematic': db_thematic
+    } # if you make other pages, add them here... 
 
-            p = Process(target=launch_server_process, args=(panel_dict,port))
-            p.start()
-            for s in range(0,6000):
-                if s % 600 ==0 : print("... we could do work here... but we're still alive")
-                time.sleep(1)
-
-            print("Restarting websocket...")
-
-            p.join(timeout=1); p.terminate()
-            
-        except KeyboardInterrupt:   
-            print("Exiting...")
-            exit()
-
-        except Exception as e:
-            print(e)
-
-        finally:
-            p.terminate()
-
+    pn.serve(panel_dict, title='ICECAPS SLEIGH_MVP Dashboard', port=port, websocket_origin='*', show=False)
+    
 
 # this runs the function main as the main program... functions
 # to come after the main code so it presents in a more logical, C-like, way

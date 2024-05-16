@@ -117,12 +117,18 @@ class DataLoader:
         if self.data is not None: ds_to_merge = [self.data]
 
         for f in sorted(flist_to_load):
-            ds_to_merge.append( 
-                self.file_preproc(
-                    xr.load_dataset(os.path.join( self.dir, f ))
-                ) 
-            )
-            self.loaded_files.append(f)
+            try:
+                ds_to_merge.append( 
+                    self.file_preproc(
+                        xr.load_dataset(os.path.join( self.dir, f ))
+                    ) 
+                )
+                self.loaded_files.append(f)
+            except Exception as e:
+                print('!!! ' + '='*44 + ' !!!')
+                print(f'DATALOADER ERROR: failed to load {f}')
+                print(e)
+                print('!!! ' + '-'*44 + ' !!!')
 
         # TODO: assess if coords='minimal' causes issues
         self.data = xr.concat(ds_to_merge, dim=self.concat_dim, coords='minimal').sortby(self.sortby_dim)

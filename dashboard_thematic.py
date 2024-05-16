@@ -30,7 +30,8 @@ def get_tabview(dld, augment) -> dashboard.TabView.TabView:
             #get_mvp_tab(augment),
             tabs.thematic.tab_met.get_met_tab(augment),
             tabs.thematic.tab_clouds.get_clouds_tab(augment),
-            tabs.thematic.tab_seb.get_seb_tab(augment)
+            tabs.thematic.tab_seb.get_seb_tab(augment),
+            tabs.instrument.tab_mvp.get_mvp_tab(augment)
         ],
         dld=dld,
         augment_dims=augment

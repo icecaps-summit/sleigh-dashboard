@@ -1,9 +1,12 @@
-'''Author: Andrew Martin
+'''
+Author: Andrew Martin
 Creation Date: 15/4/24
 
-Script containing the Tab class, which will display the individual plots required for each individual class.
-The class will also hold references to the relevant DataLoader objects required to display the data.
-Each tab also has its own instrument-specific datetime range picker that can be linked to a global datetime picker if desired. 
+Script containing the Tab class, which will display the individual plots required for
+each individual class.  The class will also hold references to the relevant DataLoader
+objects required to display the data.  Each tab also has its own instrument-specific
+datetime range picker that can be linked to a global datetime picker if desired.
+
 '''
 
 import panel as pn
@@ -16,9 +19,13 @@ import datetime as dt
 _default_dtr = (dt.datetime.now()-dt.timedelta(days=1), dt.datetime.now())
 
 class Tab:
-    '''The Tab class provides all of the functionality of an individual viewable tab in the Dashboard.
-    Each tab will have references only to the DataLoader objects it requires access to in order to plot the required data. It will also contain an instrument-specific datetime picker that can be linked to a global datetime picker for the Dashboard.
-    The DataLoader objects will be bound to the specific datetime picker, so changes to the selected range will attempt to load new data. 
+    '''
+    The Tab class provides all of the functionality of an individual viewable tab in
+    the Dashboard.  Each tab will have references only to the DataLoader objects it
+    requires access to in order to plot the required data. It will also contain an
+    instrument-specific datetime picker that can be linked to a global datetime picker
+    for the Dashboard.  The DataLoader objects will be bound to the specific datetime
+    picker, so changes to the selected range will attempt to load new data.
     '''
 
     def __init__(self,
@@ -32,7 +39,8 @@ class Tab:
         self.name = name
         
         # upon initialisation, the DatetimeRangePicker assumes default values (allows standalone use). When used within a Dashboard, self.bind_gdtp can be used to bind a global datetime range picker.
-        self.dtp = pn.widgets.DatetimeRangePicker(name=f'{name} datetime picker', value=_default_dtr)
+        #self.dtp = pn.widgets.DatetimeRangePicker(name=f'{name} datetime picker', value=_default_dtr)
+        self.dtp = pn.widgets.DatetimeRangePicker(name=f'', value=_default_dtr)
         self.dld = dld
         self.required_DL = required_DL
         self.plottables = plottables

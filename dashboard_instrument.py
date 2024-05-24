@@ -82,7 +82,7 @@ def serve_dashboard_instruments(dld):
     dtr_end = dt.datetime(year=now.year, month=now.month, day=now.day)
     one_day = dt.timedelta(days=1)
     dtr = (dtr_end-one_day, dtr_end) # should start by displaying two days of data
-    dtp_args = {'value':dtr, 'start':start, 'end':end, 'name':'global dtp picker'}
+    dtp_args = {'value':dtr, 'start':start, 'end':end, 'name':''}
     
     serve = lambda: dashboard_instruments(dtp_args, dld)
     return serve

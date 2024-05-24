@@ -16,7 +16,9 @@ import xarray as xr
 
 import datetime as dt
 
-_default_dtr = (dt.datetime.now()-dt.timedelta(days=1), dt.datetime.now())
+_dt_now = dt.datetime.now()
+_today = dt.date(year=_dt_now.year, month=_dt_now.month, day=_dt_now.day)
+_default_dtr = (_today-dt.timedelta(days=1), _today)
 
 class Tab:
     '''
@@ -38,9 +40,12 @@ class Tab:
     ):
         self.name = name
         
-        # upon initialisation, the DatetimeRangePicker assumes default values (allows standalone use). When used within a Dashboard, self.bind_gdtp can be used to bind a global datetime range picker.
+        # upon initialisation, the DateRangePicker assumes default values (allows
+        # standalone use). When used within a Dashboard, self.bind_gdtp can be used to
+        # bind a global datetime range picker.
+
         #self.dtp = pn.widgets.DatetimeRangePicker(name=f'{name} datetime picker', value=_default_dtr)
-        self.dtp = pn.widgets.DatetimeRangePicker(name=f'', value=_default_dtr)
+        self.dtp = pn.widgets.DateRangePicker(name=f'', value=_default_dtr)
         self.dld = dld
         self.required_DL = required_DL
         self.plottables = plottables
@@ -89,7 +94,7 @@ class Tab:
         print(f'#### Tab {self.name}._bind_gdtp_val: {gdtr=}')
         self.dtp.value = gdtr
 
-    def bind_gdtp(self, gdtp: pn.widgets.DatetimeRangePicker):
+    def bind_gdtp(self, gdtp: pn.widgets.DateRangePicker):
         self.gdtp = gdtp
         self.dtp.value = self.gdtp
         self.dtp.start = self.gdtp.start
@@ -97,10 +102,9 @@ class Tab:
         #pn.bind(self._bind_gdtp_val, self.gdtp)
         print(f'#### Tab {self.name}.bind_gdtp complete')
         '''
-        self.dtp = pn.widgets.DatetimeRangePicker(
+        self.dtp = pn.widgets.DateRangePicker(
             name=f'{self.name} datetime picker', value=gdtp.value,
             start=gdtp.start, end=gdtp.end, 
-            enable_seconds=False
         )
         '''
         # binds the Tab objects datetime picker to the global one. Changes in the global dtp reflect in the local one.

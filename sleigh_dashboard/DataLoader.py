@@ -140,7 +140,7 @@ class DataLoader:
         '''Returns a list of filenames using the fname_fmt that are utilised within dtr.'''
         # TODO: implement hourly loading? for gfs... 
         start = dtr[0]
-        end = dtr[1]
+        end = dt.datetime.combine(dtr[1], dt.datetime.min.time())
         dt0 = dt.datetime(year=start.year, month=start.month, day=start.day)
         one_day = dt.timedelta(days=1)
 

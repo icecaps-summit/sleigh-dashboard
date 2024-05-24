@@ -42,7 +42,7 @@ class TabView:
     
 
     def bind_gdtp(self, gdtp):
-        '''Function that binds a global DatetimeRangePicker object to the individual Tab objects in the TabView.'''
+        '''Function that binds a global DateRangePicker object to the individual Tab objects in the TabView.'''
         self.gdtp = gdtp
         for t in self.tablist:
             t.bind_gdtp(gdtp)

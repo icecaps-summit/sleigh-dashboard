@@ -45,10 +45,10 @@ class Dashboard:
             tabview_func : callable -> TabView
                 a callable function that takes the input of a (dld = dict[str: DataLoader], augment:bool) and returns a TabView object, a collection of pre-determined tabs
         '''
-        dtp_args['enable_seconds'] = False
-        self.gdtp         = pn.widgets.DatetimeRangePicker(**dtp_args,
-                                                           align='center',
-                                                           styles={"margin-left": "-5px",})
+        self.gdtp         = pn.widgets.DateRangePicker(**dtp_args,
+                                                       width=175,
+                                                       align='center',
+                                                       styles={"margin-left": "-5px",})
 
         self.compare      = pn.widgets.Switch(name='Compare', value=False,
                                               align='center', styles={"margin-left": "-10px",})
@@ -128,9 +128,9 @@ class Dashboard:
         )
 
 
-        select_labels  = pn.Row('### Time range', pn.HSpacer(),'###  Compare', width=400,
+        select_labels  = pn.Row('### Time range', pn.HSpacer(),'###  Compare', width=300,
                                 styles={"margin": '0px', 'margin-bottom': '-15px'})
-        select_objects = pn.Row(self.gdtp, pn.HSpacer(), self.compare, width=390)
+        select_objects = pn.Row(self.gdtp, pn.HSpacer(), self.compare, width=290)
         select_column  = pn.Column(select_labels, select_objects)
 
 
@@ -168,9 +168,17 @@ class Dashboard:
                 sizing_mode='stretch_height'
             )
 
+        
+        line = pn.Row(
+            '',
+            margin=0,
+            height=4,
+            sizing_mode="stretch_width",
+            styles={"background":"darkcyan"},)
 
         return pn.Column(
             self.header, 
+            line,
             self.top_row,
             pn.bind(main_content, self.compare),
             sizing_mode = 'stretch_both'

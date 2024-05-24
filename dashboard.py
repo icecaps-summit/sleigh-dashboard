@@ -15,7 +15,7 @@ from panel import HSpacer, Spacer
 import dashboard_instrument, dashboard_science
 
 pn.extension(design='material', template='material',
-             global_css=[':root { --design-primary-color: cornflowerblue; }',
+             global_css=[':root { --design-primary-color: steelblue; }',
                          ':root { --panel-primary-color: mediumturquoise; }',
                          ])
 
@@ -27,12 +27,12 @@ pn.extension('echarts', template='fast', nthreads=4, notifications=False)
 # Create the standard global datetime picker choices.
 # Specific datetime-limited dashboards (i.e. melt events) should have
 # their datetime ranges specified in their files
-start = dt.datetime(2024,5,9)
+start = dt.date(2024,5,15)
 end = None#dt.datetime(2024,3,25) # deliberately including days at the end where data doesn't exist, DataLoader should be impervious to these problems...
 now = dt.datetime.now()
-dtr_end = dt.datetime(year=now.year, month=now.month, day=now.day)
+dtr_end = dt.date(year=now.year, month=now.month, day=now.day)
 one_day = dt.timedelta(days=1)
-dtr = (dtr_end-one_day, dtr_end) # should start by displaying two days of data
+dtr = (dtr_end-one_day, dtr_end) # should start by first day of data
 dtp_args = {'value':dtr, 'start':start, 'end':end, 'name':''}
 
 # lambda functions to create panel entries

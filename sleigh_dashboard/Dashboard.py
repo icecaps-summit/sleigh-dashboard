@@ -141,7 +141,7 @@ class Dashboard:
             sizing_mode='stretch_width',
             align='center',
             height=90,
-            styles={"margin-bottom": '-40px'},
+            styles={"margin-bottom": '-20px'},
         )
 
     def __panel__(self):

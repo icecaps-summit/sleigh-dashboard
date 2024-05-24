@@ -45,7 +45,7 @@ class Tab:
         # bind a global datetime range picker.
 
         #self.dtp = pn.widgets.DatetimeRangePicker(name=f'{name} datetime picker', value=_default_dtr)
-        self.dtp = pn.widgets.DateRangePicker(name=f'', value=_default_dtr)
+        self.dtp = pn.widgets.DateRangePicker(name=f'', value=_default_dtr, width=175, align="center")
         self.dld = dld
         self.required_DL = required_DL
         self.plottables = plottables
@@ -57,9 +57,10 @@ class Tab:
         self.top_row = pn.Row(
             pn.pane.Markdown(f'# {longname}'),
             pn.HSpacer(),
-            f'{name} datetime picker', self.dtp,
+            f'{name} time range', self.dtp,
             pn.HSpacer(),
-            sizing_mode='stretch_width', height=60
+            align="center",
+            sizing_mode='stretch_width', 
         )
 
         self.scroll_bkg = 'snow'
@@ -103,7 +104,7 @@ class Tab:
         print(f'#### Tab {self.name}.bind_gdtp complete')
         '''
         self.dtp = pn.widgets.DateRangePicker(
-            name=f'{self.name} datetime picker', value=gdtp.value,
+            name=f'{self.name} time range', value=gdtp.value,
             start=gdtp.start, end=gdtp.end, 
         )
         '''

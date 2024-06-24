@@ -12,6 +12,7 @@ from sleigh_dashboard import DataLoader, Plottables, Tab
 def mvp_load_preproc(mvp):
     tcoords = [('time', mvp.time.values)]
     mvp['BatterySOC'] = xr.DataArray(mvp.BatterySOC.values, coords=tcoords, name='SOC [%]')
+    mvp['BatteryVoltage'] = xr.DataArray(mvp.WindVolts.values, coords=tcoords, name='BattVolts [V]')
     mvp['BatteryWatts'] = xr.DataArray(mvp.BatteryWatts.values, coords=tcoords, name='BattS [W]')
 
     mvp['SolarWatts_Tot'] = xr.DataArray(
@@ -142,6 +143,13 @@ def get_mvp_tab(augment=False):
         {'ylim':(-5,105), 'ylabel':'SOC %'},
         augment=augment
     )
+
+    p_BV = mvpplot_scatter(
+        'BatteryVoltage', 'Battery Voltage (<51 at night == BAD NEWS)',
+        {'ylim':(48,56.5), 'ylabel':'BattVolts [V]'},
+        augment=augment
+    )
+
     p_batteryWatts = mvpplot_scatter(
         'BatteryWatts', 'Battery Power', 
         {'ylabel':'Power (W)'},
@@ -168,7 +176,7 @@ def get_mvp_tab(augment=False):
         #[p_renenwables_1, p_renenwables],
         #[p_batts_soc*p_batts_power, p_renenwables_1, p_renenwables,p_renewables_new],
         #[p_dials],
-        [p_SOC, p_batteryWatts, p_renewables, p_ACDC * p_zero],
+        [p_BV, p_renewables, p_ACDC * p_zero],
         None, ['mvp'], 
         'Minimum Viable Powersystem',augment_dims=augment
     )

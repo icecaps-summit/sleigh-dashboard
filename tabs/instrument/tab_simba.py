@@ -5,7 +5,7 @@ from sleigh_dashboard import DataLoader, Plottables, Tab
 
 def simba_load_preproc(simba):
     simba['height'] = simba.height + 350
-    simba = simba.loc[dict(height=slice(100,-150))]
+    simba = simba.loc[dict(height=slice(60,-150))]
     return simba
 
 

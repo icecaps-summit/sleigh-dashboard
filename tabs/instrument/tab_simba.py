@@ -3,12 +3,20 @@ warnings.filterwarnings("once")
 
 from sleigh_dashboard import DataLoader, Plottables, Tab
 
+def simba_load_preproc(simba):
+    simba['height'] = simba.height + 350
+    simba = simba.loc[dict(height=slice(100,-150))]
+    return simba
+
+
 def DL_simba():
-    return DataLoader.DataLoader('simba', '/data/simba', 'summary_simba_%Y%m%d.nc')
+    dl = DataLoader.DataLoader('simba', '/data/simba',
+                               'summary_simba_%Y%m%d.nc', file_preproc=simba_load_preproc)
+    return dl
 
 
 class simbaplot_2d(Plottables.Plot_2D):
-    def __init__(self, variable, title, clim=(None, None), cmap='viridis', cnorm='linear', augment=False):
+    def __init__(self, variable, title, clim=(None, None), hrange=(None,None), cmap='inferno', cnorm='linear', hoffset=0, augment=False):
         pargs = {
             'x':'time', 'y':'height', 'xlabel':'time', 'ylabel':'Height AGL (cm)'
         }
@@ -26,7 +34,8 @@ class simbaplot_scatter(Plottables.Plot_line_scatter):
         self.plotargs['title'] = title
 
 def get_simba_tab(augment=False):
-    p_T = simbaplot_2d('temperature', 'Temperature (°C)', augment=augment, clim=(-35,5))
+    p_T = simbaplot_2d('temperature', 'Temperature (°C)', augment=augment,
+                       clim=(-20,5), hrange=(-150,50))
     p_samplespan = simbaplot_scatter('sample_span', 'Sample span', {},augment=augment)
     p_batt = simbaplot_scatter('battery_voltage', 'Battery Voltage (V)', {}, augment=augment)
     p_startstop = simbaplot_scatter('sample_start', 'Sample time', {'label':'start'}, augment=augment) * simbaplot_scatter('sample_end', 'Sample time', {'label':'end'}, augment=augment)
